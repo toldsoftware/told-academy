@@ -2125,6 +2125,10 @@
 	        this.words = words;
 	        this.attempt = 0;
 	        this.isReadyButtonVisible = false;
+	        this.speedMode = false;
+	        this.countdownLimit = 15;
+	        this.countdownTimer = 0;
+	        this.countdownIntervalId = 0;
 	        this.buttons = [];
 	        var _loop_1 = function (column) {
 	            var _loop_2 = function (row) {
@@ -2162,6 +2166,32 @@
 	                _this.loadWord();
 	            }
 	        });
+	        // Speed Mode Button
+	        this.buttons.push({
+	            u: 0,
+	            v: 0,
+	            callback: function () {
+	                if (_this.speedMode === true) {
+	                    _this.speedMode = false;
+	                    clearInterval(_this.countdownIntervalId);
+	                    return;
+	                }
+	                _this.speedMode = (_this.speedMode - 1);
+	                if (_this.speedMode <= -3) {
+	                    _this.speedMode = true;
+	                    _this.countdownIntervalId = setInterval(function () {
+	                        _this.countdownTimer--;
+	                        if (_this.countdownTimer < 0) {
+	                            _this.word = '';
+	                            _this.update(true);
+	                            _this.countdownTimer = _this.countdownLimit;
+	                        }
+	                        _this.redraw(false);
+	                    }, 1000);
+	                }
+	                console.log('speedMode=', _this.speedMode);
+	            }
+	        });
 	        // // Ready Button
 	        // this.buttons.push({
 	        //     u: 0.5,
@@ -2175,17 +2205,17 @@
 	    }
 	    WordToPictureGame.prototype.update = function (forceRedraw, input) {
 	        return tslib_1.__awaiter(this, void 0, void 0, function () {
-	            var _this = this;
 	            return tslib_1.__generator(this, function (_a) {
 	                switch (_a.label) {
 	                    case 0:
+	                        if (input && input.type !== canvas_access_1.UserInputType.Move && this.speedMode === true) {
+	                            this.countdownTimer = this.countdownLimit;
+	                        }
 	                        this.handleInput(input);
 	                        // Get Next Word
 	                        if (this.word) {
 	                            if (forceRedraw) {
-	                                requestAnimationFrame(function () {
-	                                    _this.draw(forceRedraw);
-	                                });
+	                                this.redraw(forceRedraw);
 	                            }
 	                            return [2 /*return*/];
 	                        }
@@ -2197,25 +2227,39 @@
 	                        _a.sent();
 	                        _a.label = 2;
 	                    case 2:
-	                        requestAnimationFrame(function () {
-	                            _this.draw(forceRedraw);
-	                        });
+	                        this.redraw(forceRedraw);
 	                        return [2 /*return*/];
 	                }
 	            });
+	        });
+	    };
+	    WordToPictureGame.prototype.redraw = function (forceRedraw) {
+	        var _this = this;
+	        requestAnimationFrame(function () {
+	            _this.draw(forceRedraw);
 	        });
 	    };
 	    WordToPictureGame.prototype.startWord = function () {
 	        return tslib_1.__awaiter(this, void 0, void 0, function () {
 	            var _this = this;
 	            return tslib_1.__generator(this, function (_a) {
-	                // Draw the word alone
-	                this.choices = null;
-	                this.isReadyButtonVisible = true;
-	                requestAnimationFrame(function () {
-	                    _this.draw(false);
-	                });
-	                return [2 /*return*/];
+	                switch (_a.label) {
+	                    case 0:
+	                        if (!(this.speedMode === true)) return [3 /*break*/, 2];
+	                        this.countdownTimer = this.countdownLimit;
+	                        return [4 /*yield*/, this.loadWord()];
+	                    case 1:
+	                        _a.sent();
+	                        return [2 /*return*/];
+	                    case 2:
+	                        // Draw the word alone
+	                        this.choices = null;
+	                        this.isReadyButtonVisible = true;
+	                        requestAnimationFrame(function () {
+	                            _this.draw(false);
+	                        });
+	                        return [2 /*return*/];
+	                }
 	            });
 	        });
 	    };
@@ -2234,7 +2278,7 @@
 	                        });
 	                        wordImageUrls = [];
 	                        if (!(this.attempt <= 0)) return [3 /*break*/, 2];
-	                        return [4 /*yield*/, get_pictures_1.getPictures(this.word, 3, this.attempt)];
+	                        return [4 /*yield*/, get_pictures_1.getPictures(this.word, 3, this.attempt - 0)];
 	                    case 1:
 	                        wordImageUrls = _d.sent();
 	                        return [3 /*break*/, 5];
@@ -2378,6 +2422,11 @@
 	                ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.4);
 	            }
 	        }
+	        if (this.countdownTimer) {
+	            ctx.fillStyle = '#00FF00';
+	            ctx.font = '24px sans-serif';
+	            ctx.fillText(this.countdownTimer + '', w * 0.05, h * 0.05);
+	        }
 	        if (this.choices) {
 	            for (var i = 0; i < this.choices.length; i++) {
 	                var choice = this.choices[i];
@@ -2448,7 +2497,7 @@
 	                return [2 /*return*/, OCA.getPictures(word, count, count * (attempt - 0))];
 	            }
 	            else {
-	                return [2 /*return*/, PB.getPictures(word, count, count * (attempt - 2))];
+	                return [2 /*return*/, PB.getPictures(word, count, count * (attempt - 1))];
 	            }
 	            return [2 /*return*/];
 	        });
@@ -2466,14 +2515,14 @@
 	var lib_1 = __webpack_require__(2);
 	lib_1.setupBrowser();
 	var http = lib_1.Platform.http();
-	var urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads';
+	var urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads&amount=100';
 	var urlTemplateAlt = 'https://openclipart.org/search/json/?query={WORD}';
 	function getPictures(word, count, skip, shouldUseAlt) {
 	    if (count === void 0) { count = 10; }
 	    if (skip === void 0) { skip = 0; }
 	    if (shouldUseAlt === void 0) { shouldUseAlt = false; }
 	    return tslib_1.__awaiter(this, void 0, void 0, function () {
-	        var url, response, imageUrls;
+	        var url, response, items, imageUrls;
 	        return tslib_1.__generator(this, function (_a) {
 	            switch (_a.label) {
 	                case 0:
@@ -2484,7 +2533,11 @@
 	                    return [4 /*yield*/, http.request(url.replace('{WORD}', word))];
 	                case 1:
 	                    response = _a.sent();
-	                    imageUrls = response.data.payload.map(function (x) { return x.svg.png_thumb; });
+	                    items = response.data.payload
+	                        .filter(function (x) { return x.title.toLowerCase().indexOf(word) >= 0; });
+	                    console.log('open-clip-art', word, items);
+	                    imageUrls = items
+	                        .map(function (x) { return x.svg.png_thumb; });
 	                    if (imageUrls.length > count) {
 	                        imageUrls = imageUrls.slice(skip, count);
 	                    }
@@ -2512,7 +2565,7 @@
 	    if (count === void 0) { count = 10; }
 	    if (skip === void 0) { skip = 0; }
 	    return tslib_1.__awaiter(this, void 0, void 0, function () {
-	        var url, response, imageUrls;
+	        var url, response, items, imageUrls;
 	        return tslib_1.__generator(this, function (_a) {
 	            switch (_a.label) {
 	                case 0:
@@ -2520,7 +2573,11 @@
 	                    return [4 /*yield*/, http.request(url.replace('{WORD}', word))];
 	                case 1:
 	                    response = _a.sent();
-	                    imageUrls = response.data.hits.map(function (x) { return x.webformatURL; });
+	                    items = response.data.hits;
+	                    items = items.filter(function (x) { return x.tags.indexOf(word) >= 0; });
+	                    items.sort(function (a, b) { return a.tags.indexOf(word) - b.tags.indexOf(word); });
+	                    console.log('pixabay', word, items);
+	                    imageUrls = items.map(function (x) { return x.webformatURL; });
 	                    if (imageUrls.length > count) {
 	                        imageUrls = imageUrls.slice(skip, count);
 	                    }

@@ -3,7 +3,7 @@ import { Platform, setupBrowser } from '@told/platform/lib';
 setupBrowser();
 let http = Platform.http();
 
-const urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads';
+const urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads&amount=100';
 const urlTemplateAlt = 'https://openclipart.org/search/json/?query={WORD}';
 
 interface OpenClipArtResponse {
@@ -54,7 +54,13 @@ export async function getPictures(word: string, count = 10, skip = 0, shouldUseA
     }
 
     let response = await http.request<OpenClipArtResponse>(url.replace('{WORD}', word));
-    let imageUrls = response.data.payload.map(x => x.svg.png_thumb);
+    let items = response.data.payload
+        .filter(x => x.title.toLowerCase().indexOf(word) >= 0);
+
+    console.log('open-clip-art', word, items);
+
+    let imageUrls = items
+        .map(x => x.svg.png_thumb);
 
     if (imageUrls.length > count) {
         imageUrls = imageUrls.slice(skip, count);

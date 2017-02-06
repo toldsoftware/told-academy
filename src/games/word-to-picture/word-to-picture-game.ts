@@ -27,6 +27,11 @@ export class WordToPictureGame implements CanvasGame {
 
     private isReadyButtonVisible = false;
 
+    private speedMode = false;
+    private countdownLimit = 15;
+    private countdownTimer = 0;
+    private countdownIntervalId = 0;
+
     constructor(private canvasAccess: CanvasAccess, private words: WordProvider) {
         this.buttons = [];
         for (let column = 0; column < 3; column++) {
@@ -63,6 +68,38 @@ export class WordToPictureGame implements CanvasGame {
             }
         });
 
+        // Speed Mode Button
+        this.buttons.push({
+            u: 0,
+            v: 0,
+            callback: () => {
+                if (this.speedMode === true) {
+                    this.speedMode = false;
+                    clearInterval(this.countdownIntervalId);
+                    return;
+                }
+
+                this.speedMode = ((this.speedMode as any) - 1) as any;
+                if ((this.speedMode as any) <= -3) {
+                    this.speedMode = true;
+
+                    this.countdownIntervalId = setInterval(() => {
+                        this.countdownTimer--;
+
+                        if (this.countdownTimer < 0) {
+                            this.word = '';
+                            this.update(true);
+                            this.countdownTimer = this.countdownLimit;
+                        }
+
+                        this.redraw(false);
+                    }, 1000);
+                }
+
+                console.log('speedMode=', this.speedMode);
+            }
+        });
+
 
         // // Ready Button
         // this.buttons.push({
@@ -78,14 +115,16 @@ export class WordToPictureGame implements CanvasGame {
 
     async update(forceRedraw: boolean, input?: UserInput) {
 
+        if (input && input.type !== UserInputType.Move && this.speedMode === true) {
+            this.countdownTimer = this.countdownLimit;
+        }
+
         this.handleInput(input);
 
         // Get Next Word
         if (this.word) {
             if (forceRedraw) {
-                requestAnimationFrame(() => {
-                    this.draw(forceRedraw);
-                });
+                this.redraw(forceRedraw);
             }
             return;
         }
@@ -94,16 +133,25 @@ export class WordToPictureGame implements CanvasGame {
         if (!this.word) {
             this.word = this.words.getNextWord();
             this.attempt = 0;
-
             await this.startWord();
         }
 
+        this.redraw(forceRedraw);
+    }
+
+    redraw(forceRedraw: boolean) {
         requestAnimationFrame(() => {
             this.draw(forceRedraw);
         });
     }
 
     async startWord() {
+        if (this.speedMode === true) {
+            this.countdownTimer = this.countdownLimit;
+            await this.loadWord();
+            return;
+        }
+
         // Draw the word alone
         this.choices = null;
         this.isReadyButtonVisible = true;
@@ -123,7 +171,7 @@ export class WordToPictureGame implements CanvasGame {
         // Get word images
 
         let wordImageUrls: string[] = [];
-        if (this.attempt <= 0) { wordImageUrls = await getPictures(this.word, 3, this.attempt); }
+        if (this.attempt <= 0) { wordImageUrls = await getPictures(this.word, 3, this.attempt - 0); }
         else if (this.attempt <= 4) { wordImageUrls = await getPictures(this.word, 9, this.attempt - 1); }
         else {
             // Fail
@@ -257,6 +305,12 @@ export class WordToPictureGame implements CanvasGame {
                 // ctx.fillText('>', w * 0.5 - rect.width * 0.5, h * 0.75);
             }
 
+        }
+
+        if (this.countdownTimer) {
+            ctx.fillStyle = '#00FF00';
+            ctx.font = '24px sans-serif';
+            ctx.fillText(this.countdownTimer + '', w * 0.05, h * 0.05);
         }
 
         if (this.choices) {

@@ -19,8 +19,13 @@ export declare class WordToPictureGame implements CanvasGame {
     private targetButton;
     private attempt;
     private isReadyButtonVisible;
+    private speedMode;
+    private countdownLimit;
+    private countdownTimer;
+    private countdownIntervalId;
     constructor(canvasAccess: CanvasAccess, words: WordProvider);
     update(forceRedraw: boolean, input?: UserInput): Promise<void>;
+    redraw(forceRedraw: boolean): void;
     startWord(): Promise<void>;
     loadWord(): Promise<void>;
     handleInput(input: UserInput): void;

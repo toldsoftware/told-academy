@@ -9,5 +9,5 @@ export async function getPictures(word: string, count = 10, attempt = 0) {
     // } else 
 
     if (attempt <= 0) { return OCA.getPictures(word, count, count * (attempt - 0)); }
-    else { return PB.getPictures(word, count, count * (attempt - 2)); }
+    else { return PB.getPictures(word, count, count * (attempt - 1)); }
 }

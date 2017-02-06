@@ -18,7 +18,7 @@ interface PixabayResponse {
         // previewHeight: 83;
         // likes: 92;
         // favorites: 67;
-        // tags: "rose, flower, yellow";
+        tags: string; // "rose, flower, yellow";
         webformatHeight: number;
         // views: 40971;
         webformatWidth: number;
@@ -43,7 +43,14 @@ export async function getPictures(word: string, count = 10, skip = 0) {
     let url = urlTemplate;
 
     let response = await http.request<PixabayResponse>(url.replace('{WORD}', word));
-    let imageUrls = response.data.hits.map(x => x.webformatURL);
+    let items = response.data.hits;
+
+    items = items.filter(x => x.tags.indexOf(word) >= 0);
+    items.sort((a, b) => a.tags.indexOf(word) - b.tags.indexOf(word));
+
+    console.log('pixabay', word, items);
+
+    let imageUrls = items.map(x => x.webformatURL);
 
     if (imageUrls.length > count) {
         imageUrls = imageUrls.slice(skip, count);
