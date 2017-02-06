@@ -1,10 +1,11 @@
 import { UserInput, CanvasAccess } from './canvas-access';
+import { ProblemHistory } from './subjects/problems';
 
 export interface CanvasGame {
     update(forceRedraw: boolean, input?: UserInput): Promise<void>;
 }
 
-export function hostGame(host: HTMLDivElement, gameFactory: (access: CanvasAccess) => CanvasGame) {
+export function hostCanvasGame(host: HTMLDivElement, gameFactory: (access: CanvasAccess) => CanvasGame) {
 
     let access = new CanvasAccess(host, input => {
         game && game.update(false, input).then();

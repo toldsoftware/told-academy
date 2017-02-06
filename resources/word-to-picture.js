@@ -45,358 +45,65 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var canvas_game_1 = __webpack_require__(1);
-	var game_1 = __webpack_require__(3);
+	var tslib_1 = __webpack_require__(1);
+	var lib_1 = __webpack_require__(2);
+	var randomize_1 = __webpack_require__(15);
+	var canvas_game_1 = __webpack_require__(10);
+	var unixode_loader_1 = __webpack_require__(14);
+	var word_to_picture_game_1 = __webpack_require__(12);
+	lib_1.setupBrowser();
+	var http = lib_1.Platform.http();
 	function setup() {
-	    var host = document.getElementById('host');
-	    canvas_game_1.hostGame(host, function (access) { return new game_1.Game(access); });
+	    var _this = this;
+	    (function () { return tslib_1.__awaiter(_this, void 0, void 0, function () {
+	        var host, doc, list, wordProvider;
+	        return tslib_1.__generator(this, function (_a) {
+	            switch (_a.label) {
+	                case 0:
+	                    host = document.getElementById('host');
+	                    return [4 /*yield*/, http.request('./subjects/Words_UniXode_Kids.txt')];
+	                case 1:
+	                    doc = (_a.sent()).dataRaw;
+	                    list = unixode_loader_1.loadUnixode(doc);
+	                    wordProvider = new SimpleWordProvider();
+	                    wordProvider.words = list.words.map(function (x) { return x.english.toLowerCase(); });
+	                    // TODO: Order Word List (Use Knowldge Tree?)
+	                    wordProvider.words = randomize_1.randomize(wordProvider.words);
+	                    // TEMP Order by length
+	                    wordProvider.words.sort(function (a, b) { return a.length - b.length; });
+	                    wordProvider.words = wordProvider.words.filter(function (x) { return x.length >= 3; });
+	                    canvas_game_1.hostCanvasGame(host, function (access) { return new word_to_picture_game_1.WordToPictureGame(access, wordProvider); });
+	                    return [2 /*return*/];
+	            }
+	        });
+	    }); })().then();
 	}
+	var SimpleWordProvider = (function () {
+	    function SimpleWordProvider() {
+	        this.words = 'cat,dog,log,hot,hat,mat,nat'.split(',');
+	        this.iWord = -1;
+	    }
+	    SimpleWordProvider.prototype.getNextWord = function () {
+	        this.iWord++;
+	        if (this.iWord > this.words.length) {
+	            this.iWord = 0;
+	        }
+	        return this.words[this.iWord];
+	    };
+	    SimpleWordProvider.prototype.getChoices = function (word, count) {
+	        return randomize_1.randomize(this.words.filter(function (x) { return x !== word; })).slice(0, 2);
+	    };
+	    SimpleWordProvider.prototype.answer = function (word, answer) {
+	        return word === answer;
+	    };
+	    return SimpleWordProvider;
+	}());
+	exports.SimpleWordProvider = SimpleWordProvider;
 	setup();
 
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var canvas_access_1 = __webpack_require__(2);
-	function hostGame(host, gameFactory) {
-	    var access = new canvas_access_1.CanvasAccess(host, function (input) {
-	        game && game.update(false, input).then();
-	    }, function () {
-	        game && game.update(true).then();
-	    });
-	    var game = gameFactory(access);
-	    game.update(true).then();
-	}
-	exports.hostGame = hostGame;
-
-
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var DEBUG = false;
-	function createBuffer() {
-	    var canvas = document.createElement('canvas');
-	    var context = canvas.getContext('2d');
-	    return { canvas: canvas, context: context };
-	}
-	var UserInputType;
-	(function (UserInputType) {
-	    UserInputType[UserInputType["Move"] = 0] = "Move";
-	    UserInputType[UserInputType["Start"] = 1] = "Start";
-	    UserInputType[UserInputType["Drag"] = 2] = "Drag";
-	    UserInputType[UserInputType["End"] = 3] = "End";
-	    UserInputType[UserInputType["ChangeToMultipleStart"] = 4] = "ChangeToMultipleStart";
-	    UserInputType[UserInputType["MultipleEnd"] = 5] = "MultipleEnd";
-	    UserInputType[UserInputType["MultipleEndAfter"] = 6] = "MultipleEndAfter";
-	    UserInputType[UserInputType["Zoom"] = 7] = "Zoom";
-	})(UserInputType = exports.UserInputType || (exports.UserInputType = {}));
-	var CanvasAccess = (function () {
-	    function CanvasAccess(host, onInput, onResize) {
-	        var _this = this;
-	        this.onInput = onInput;
-	        this.onResize = onResize;
-	        this.isInputDown = false;
-	        this.finalBuffer = createBuffer();
-	        host.appendChild(this.finalBuffer.canvas);
-	        this.canvas = this.finalBuffer.canvas;
-	        this.context = this.finalBuffer.context;
-	        var resize = function () {
-	            _this.width = _this.finalBuffer.canvas.width = host.clientWidth;
-	            _this.height = _this.finalBuffer.canvas.height = host.clientHeight;
-	            onResize();
-	        };
-	        resize();
-	        host.addEventListener('resize', function () { return resize(); });
-	        window.addEventListener('resize', function () { return resize(); });
-	        this.finalBuffer.canvas.addEventListener('mousedown', function (e) { return _this.getInput(e, UserInputType.Start); });
-	        this.finalBuffer.canvas.addEventListener('touchstart', function (e) { return _this.getInput(e, UserInputType.Start, true); });
-	        window.addEventListener('mousemove', function (e) { return _this.getInput(e, UserInputType.Move); });
-	        window.addEventListener('touchmove', function (e) { return _this.getInput(e, UserInputType.Move, true); });
-	        window.addEventListener('mouseup', function (e) { return _this.getInput(e, UserInputType.End); });
-	        window.addEventListener('touchend', function (e) { return _this.getInput(e, UserInputType.End, true); });
-	        this.finalBuffer.canvas.addEventListener('mousewheel', function (e) { return _this.getInput(e, UserInputType.Zoom, false); });
-	    }
-	    CanvasAccess.prototype.getInput = function (e, type, isTouch) {
-	        if (isTouch === void 0) { isTouch = false; }
-	        var origType = type;
-	        var xCanvas = this.xCanvasLast;
-	        var yCanvas = this.yCanvasLast;
-	        var cvs = this.finalBuffer.canvas;
-	        var rect = cvs.getBoundingClientRect();
-	        var me = e;
-	        var te = e;
-	        var isMultiple = false;
-	        var x2Canvas = this.x2CanvasLast;
-	        var y2Canvas = this.y2CanvasLast;
-	        var isAnyTouch = false;
-	        var inputCount = 0;
-	        if (me.clientX) {
-	            xCanvas = me.clientX - rect.left;
-	            yCanvas = me.clientY - rect.top;
-	            inputCount = 1;
-	        }
-	        else if (te.touches != null && te.touches.length > 0) {
-	            xCanvas = te.touches[0].clientX - rect.left;
-	            yCanvas = te.touches[0].clientY - rect.top;
-	            inputCount = 1;
-	            if (te.touches[1]) {
-	                if (DEBUG) {
-	                    console.log('2 FINGER');
-	                }
-	                x2Canvas = te.touches[1].clientX - rect.left;
-	                y2Canvas = te.touches[1].clientY - rect.top;
-	                isMultiple = true;
-	                inputCount = 2;
-	            }
-	            isAnyTouch = true;
-	        }
-	        var isMultipleStart = isMultiple && !this.isMultipleLast;
-	        var isMultipleEnd = !isMultiple && this.isMultipleLast;
-	        this.xCanvasLast = xCanvas;
-	        this.yCanvasLast = yCanvas;
-	        this.x2CanvasLast = x2Canvas;
-	        this.y2CanvasLast = y2Canvas;
-	        this.isMultipleLast = isMultiple;
-	        // Scale for viewPort
-	        var u = (xCanvas / cvs.width);
-	        var v = (yCanvas / cvs.height);
-	        var x = u * this.width;
-	        var y = v * this.height;
-	        var u2 = (x2Canvas / cvs.width);
-	        var v2 = (y2Canvas / cvs.height);
-	        var x2 = u2 * this.width;
-	        var y2 = v2 * this.height;
-	        if (type === UserInputType.Move && this.isInputDown) {
-	            type = UserInputType.Drag;
-	        }
-	        if (isMultipleStart) {
-	            type = UserInputType.ChangeToMultipleStart;
-	            this.hasBeenMultiple = true;
-	            this.inputDownStart = Date.now();
-	            isMultiple = true;
-	        }
-	        else if (isMultipleEnd) {
-	            type = UserInputType.MultipleEnd;
-	            isMultiple = true;
-	        }
-	        else if (!isMultiple && this.hasBeenMultiple) {
-	            type = UserInputType.MultipleEndAfter;
-	            isMultiple = true;
-	        }
-	        var duration = Date.now() - (this.inputDownStart || Date.now());
-	        var zoomAmount = e.deltaY;
-	        this.onInput({ x: x, y: y, type: type, duration: duration, u: u, v: v, isMultiple: isMultiple, inputCount: inputCount, u2: u2, v2: v2, x2: x2, y2: y2, isTouch: isTouch, zoomAmount: zoomAmount });
-	        if (origType === UserInputType.Start) {
-	            this.isInputDown = true;
-	            this.inputDownStart = Date.now();
-	        }
-	        else if (origType === UserInputType.End && !isAnyTouch) {
-	            this.isInputDown = false;
-	            this.inputDownStart = null;
-	            this.hasBeenMultiple = false;
-	        }
-	        e.preventDefault();
-	        return false;
-	    };
-	    return CanvasAccess;
-	}());
-	exports.CanvasAccess = CanvasAccess;
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var tslib_1 = __webpack_require__(4);
-	var canvas_access_1 = __webpack_require__(2);
-	var get_pictures_open_clip_art_1 = __webpack_require__(5);
-	var TEMP_WORDS = ['touch', 'zebra', 'keyboard', 'car', 'cat', 'hat', 'dog'];
-	var Game = (function () {
-	    function Game(canvasAccess) {
-	        var _this = this;
-	        this.canvasAccess = canvasAccess;
-	        this.buttons = [];
-	        var _loop_1 = function (column) {
-	            var _loop_2 = function (row) {
-	                var _a = this_1.getButtonUV(column, row), u = _a.u, v = _a.v, uw = _a.uw, vh = _a.vh;
-	                this_1.buttons.push({
-	                    u: u + uw * 0.5,
-	                    v: v + vh * 0.5,
-	                    callback: function () {
-	                        _this.selectImage(column, row);
-	                    }
-	                });
-	            };
-	            for (var row = 0; row < 3; row++) {
-	                _loop_2(row);
-	            }
-	        };
-	        var this_1 = this;
-	        for (var column = 0; column < 3; column++) {
-	            _loop_1(column);
-	        }
-	    }
-	    Game.prototype.update = function (forceRedraw, input) {
-	        return tslib_1.__awaiter(this, void 0, void 0, function () {
-	            var _this = this;
-	            var _a, i, url, image;
-	            return tslib_1.__generator(this, function (_b) {
-	                switch (_b.label) {
-	                    case 0:
-	                        this.handleInput(input);
-	                        // Get Next Word
-	                        if (this.word) {
-	                            if (forceRedraw) {
-	                                requestAnimationFrame(function () {
-	                                    _this.draw(forceRedraw);
-	                                });
-	                            }
-	                            return [2 /*return*/];
-	                        }
-	                        if (!this.words) {
-	                            // TODO: Get Word List
-	                            this.words = TEMP_WORDS;
-	                            this.iWord = -1;
-	                        }
-	                        if (!!this.word) return [3 /*break*/, 2];
-	                        this.iWord++;
-	                        if (this.iWord >= this.words.length) {
-	                            this.iWord = 0;
-	                        }
-	                        this.word = this.words[this.iWord];
-	                        // Get word images
-	                        _a = this;
-	                        return [4 /*yield*/, get_pictures_open_clip_art_1.getPictures(this.word)];
-	                    case 1:
-	                        // Get word images
-	                        _a.wordImageUrls = _b.sent();
-	                        this.wordImages = [];
-	                        if (this.wordImageUrls.length > 9) {
-	                            this.wordImageUrls = this.wordImageUrls.slice(0, 9);
-	                        }
-	                        for (i = 0; i < this.wordImageUrls.length; i++) {
-	                            url = this.wordImageUrls[i];
-	                            image = this.wordImages[i] = new Image();
-	                            image.src = url;
-	                            image.onload = function () {
-	                                requestAnimationFrame(function () {
-	                                    _this.draw(false);
-	                                });
-	                            };
-	                        }
-	                        _b.label = 2;
-	                    case 2:
-	                        requestAnimationFrame(function () {
-	                            _this.draw(forceRedraw);
-	                        });
-	                        return [2 /*return*/];
-	                }
-	            });
-	        });
-	    };
-	    Game.prototype.handleInput = function (input) {
-	        if (!input) {
-	            return;
-	        }
-	        if (input.type === canvas_access_1.UserInputType.Start) {
-	            if (this.buttons.length <= 0) {
-	                return;
-	            }
-	            console.log(input);
-	            var distances = this.buttons.map(function (b) { return ({
-	                b: b,
-	                distSq: (b.u - input.u) * (b.u - input.u) + (b.v - input.v) * (b.v - input.v)
-	            }); });
-	            var nearest = distances.reduce(function (out, b) { return out.distSq < b.distSq ? out : b; });
-	            this.targetButton = nearest.b;
-	            console.log(this.targetButton);
-	        }
-	        if (input.type === canvas_access_1.UserInputType.End) {
-	            this.targetButton && this.targetButton.callback();
-	            this.targetButton = null;
-	        }
-	    };
-	    Game.prototype.selectImage = function (column, row) {
-	        var _this = this;
-	        var i = column * 3 + row;
-	        console.log(i, this.wordImages[i], this.wordImageUrls[i]);
-	        // TODO: Record Image Selection
-	        this.word = null;
-	        this.wordImages = null;
-	        this.wordImageUrls = null;
-	        requestAnimationFrame(function () {
-	            _this.draw(false);
-	        });
-	    };
-	    Game.prototype.draw = function (forceRedraw) {
-	        var cvx = this.canvasAccess.canvas;
-	        var ctx = this.canvasAccess.context;
-	        var w = this.canvasAccess.width;
-	        var h = this.canvasAccess.height;
-	        //        if (forceRedraw) {
-	        ctx.clearRect(0, 0, w, h);
-	        //      }
-	        if (this.word) {
-	            var rect = ctx.measureText(this.word);
-	            ctx.fillStyle = '#FFFF00';
-	            ctx.font = '24px sans-serif';
-	            ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
-	        }
-	        if (this.wordImages) {
-	            for (var i = 0; i < this.wordImages.length; i++) {
-	                var wordImage = this.wordImages[i];
-	                if (!wordImage.width) {
-	                    continue;
-	                }
-	                this.drawImage(wordImage, Math.floor(i / 3), i % 3);
-	            }
-	        }
-	    };
-	    Game.prototype.getButtonUV = function (column, row) {
-	        var u = 0.05 + column * 0.3;
-	        var v = 0.15 + row * 0.25;
-	        var uw = 0.3 - 0.025;
-	        var vh = 0.25 - 0.025;
-	        return { u: u, v: v, uw: uw, vh: vh };
-	    };
-	    Game.prototype.drawImage = function (image, column, row) {
-	        var _a = this.getButtonUV(column, row), u = _a.u, v = _a.v, uw = _a.uw, vh = _a.vh;
-	        var w = this.canvasAccess.width;
-	        var h = this.canvasAccess.height;
-	        var ctx = this.canvasAccess.context;
-	        // Maintain Image Aspect Ratio
-	        var ws = w * uw;
-	        var hs = h * vh;
-	        var xs = w * u;
-	        var ys = h * v;
-	        var wi = image.width;
-	        var hi = image.height;
-	        var wScale = ws / wi;
-	        var hScale = hs / hi;
-	        var scale = Math.min(wScale, hScale);
-	        var wsNew = wi * scale;
-	        var hsNew = hi * scale;
-	        xs += (ws - wsNew) * 0.5;
-	        ys += (hs - hsNew) * 0.5;
-	        ws = wsNew;
-	        hs = hsNew;
-	        ctx.drawImage(image, 0, 0, wi, hi, xs, ys, ws, hs);
-	        ctx.strokeStyle = '#CCCCCC';
-	        ctx.strokeRect(w * u, h * v, w * uw, h * vh);
-	        // console.log(column, row, u, v);
-	    };
-	    return Game;
-	}());
-	exports.Game = Game;
-
-
-/***/ },
-/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {/*! *****************************************************************************
@@ -531,57 +238,30 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var tslib_1 = __webpack_require__(4);
-	var lib_1 = __webpack_require__(6);
-	lib_1.setupBrowser();
-	var http = lib_1.Platform.http();
-	var urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads';
-	function getPictures(word) {
-	    return tslib_1.__awaiter(this, void 0, void 0, function () {
-	        var response, imageUrls;
-	        return tslib_1.__generator(this, function (_a) {
-	            switch (_a.label) {
-	                case 0: return [4 /*yield*/, http.request(urlTemplate.replace('{WORD}', word))];
-	                case 1:
-	                    response = _a.sent();
-	                    imageUrls = response.data.payload.map(function (x) { return x.svg.png_thumb; });
-	                    return [2 /*return*/, imageUrls];
-	            }
-	        });
-	    });
-	}
-	exports.getPictures = getPictures;
-
-
-/***/ },
-/* 6 */
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	function __export(m) {
 	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	}
-	__export(__webpack_require__(7));
+	__export(__webpack_require__(3));
 	//# sourceMappingURL=index.js.map
 
 /***/ },
-/* 7 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	function __export(m) {
 	    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	}
-	__export(__webpack_require__(8));
-	__export(__webpack_require__(9));
+	__export(__webpack_require__(4));
+	__export(__webpack_require__(5));
 	//# sourceMappingURL=index.js.map
 
 /***/ },
-/* 8 */
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -596,7 +276,7 @@
 	//# sourceMappingURL=platform.js.map
 
 /***/ },
-/* 9 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -635,11 +315,11 @@
 	        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
 	    }
 	};
-	var P = __webpack_require__(8);
-	var browser_ajax_1 = __webpack_require__(10);
+	var P = __webpack_require__(4);
+	var browser_ajax_1 = __webpack_require__(6);
 	function setupBrowser() {
 	    P.Platform.provider = new BrowserPlatformProvider();
-	    Promise = __webpack_require__(11).Promise;
+	    Promise = __webpack_require__(7).Promise;
 	}
 	exports.setupBrowser = setupBrowser;
 	var BrowserPlatformProvider = (function () {
@@ -700,7 +380,7 @@
 	//# sourceMappingURL=browser.js.map
 
 /***/ },
-/* 10 */
+/* 6 */
 /***/ function(module, exports) {
 
 	// Vanilla Ajax Requests
@@ -870,7 +550,7 @@
 	//# sourceMappingURL=browser-ajax.js.map
 
 /***/ },
-/* 11 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var require;/* WEBPACK VAR INJECTION */(function(process, global) {/*!
@@ -1009,7 +689,7 @@
 	function attemptVertx() {
 	  try {
 	    var r = require;
-	    var vertx = __webpack_require__(13);
+	    var vertx = __webpack_require__(9);
 	    vertxNext = vertx.runOnLoop || vertx.runOnContext;
 	    return useVertxTimer();
 	  } catch (e) {
@@ -2030,10 +1710,10 @@
 	
 	})));
 	//# sourceMappingURL=es6-promise.map
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12), (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8), (function() { return this; }())))
 
 /***/ },
-/* 12 */
+/* 8 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -2219,10 +1899,597 @@
 
 
 /***/ },
-/* 13 */
+/* 9 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var canvas_access_1 = __webpack_require__(11);
+	function hostCanvasGame(host, gameFactory) {
+	    var access = new canvas_access_1.CanvasAccess(host, function (input) {
+	        game && game.update(false, input).then();
+	    }, function () {
+	        game && game.update(true).then();
+	    });
+	    var game = gameFactory(access);
+	    game.update(true).then();
+	}
+	exports.hostCanvasGame = hostCanvasGame;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var DEBUG = false;
+	function createBuffer() {
+	    var canvas = document.createElement('canvas');
+	    var context = canvas.getContext('2d');
+	    return { canvas: canvas, context: context };
+	}
+	var UserInputType;
+	(function (UserInputType) {
+	    UserInputType[UserInputType["Move"] = 0] = "Move";
+	    UserInputType[UserInputType["Start"] = 1] = "Start";
+	    UserInputType[UserInputType["Drag"] = 2] = "Drag";
+	    UserInputType[UserInputType["End"] = 3] = "End";
+	    UserInputType[UserInputType["ChangeToMultipleStart"] = 4] = "ChangeToMultipleStart";
+	    UserInputType[UserInputType["MultipleEnd"] = 5] = "MultipleEnd";
+	    UserInputType[UserInputType["MultipleEndAfter"] = 6] = "MultipleEndAfter";
+	    UserInputType[UserInputType["Zoom"] = 7] = "Zoom";
+	})(UserInputType = exports.UserInputType || (exports.UserInputType = {}));
+	var CanvasAccess = (function () {
+	    function CanvasAccess(host, onInput, onResize) {
+	        var _this = this;
+	        this.onInput = onInput;
+	        this.onResize = onResize;
+	        this.isInputDown = false;
+	        this.finalBuffer = createBuffer();
+	        host.appendChild(this.finalBuffer.canvas);
+	        this.canvas = this.finalBuffer.canvas;
+	        this.context = this.finalBuffer.context;
+	        var resize = function () {
+	            _this.width = _this.finalBuffer.canvas.width = host.clientWidth;
+	            _this.height = _this.finalBuffer.canvas.height = host.clientHeight;
+	            onResize();
+	        };
+	        resize();
+	        host.addEventListener('resize', function () { return resize(); });
+	        window.addEventListener('resize', function () { return resize(); });
+	        this.finalBuffer.canvas.addEventListener('mousedown', function (e) { return _this.getInput(e, UserInputType.Start); });
+	        this.finalBuffer.canvas.addEventListener('touchstart', function (e) { return _this.getInput(e, UserInputType.Start, true); });
+	        window.addEventListener('mousemove', function (e) { return _this.getInput(e, UserInputType.Move); });
+	        window.addEventListener('touchmove', function (e) { return _this.getInput(e, UserInputType.Move, true); });
+	        window.addEventListener('mouseup', function (e) { return _this.getInput(e, UserInputType.End); });
+	        window.addEventListener('touchend', function (e) { return _this.getInput(e, UserInputType.End, true); });
+	        this.finalBuffer.canvas.addEventListener('mousewheel', function (e) { return _this.getInput(e, UserInputType.Zoom, false); });
+	    }
+	    CanvasAccess.prototype.getInput = function (e, type, isTouch) {
+	        if (isTouch === void 0) { isTouch = false; }
+	        var origType = type;
+	        var xCanvas = this.xCanvasLast;
+	        var yCanvas = this.yCanvasLast;
+	        var cvs = this.finalBuffer.canvas;
+	        var rect = cvs.getBoundingClientRect();
+	        var me = e;
+	        var te = e;
+	        var isMultiple = false;
+	        var x2Canvas = this.x2CanvasLast;
+	        var y2Canvas = this.y2CanvasLast;
+	        var isAnyTouch = false;
+	        var inputCount = 0;
+	        if (me.clientX) {
+	            xCanvas = me.clientX - rect.left;
+	            yCanvas = me.clientY - rect.top;
+	            inputCount = 1;
+	        }
+	        else if (te.touches != null && te.touches.length > 0) {
+	            xCanvas = te.touches[0].clientX - rect.left;
+	            yCanvas = te.touches[0].clientY - rect.top;
+	            inputCount = 1;
+	            if (te.touches[1]) {
+	                if (DEBUG) {
+	                    console.log('2 FINGER');
+	                }
+	                x2Canvas = te.touches[1].clientX - rect.left;
+	                y2Canvas = te.touches[1].clientY - rect.top;
+	                isMultiple = true;
+	                inputCount = 2;
+	            }
+	            isAnyTouch = true;
+	        }
+	        var isMultipleStart = isMultiple && !this.isMultipleLast;
+	        var isMultipleEnd = !isMultiple && this.isMultipleLast;
+	        this.xCanvasLast = xCanvas;
+	        this.yCanvasLast = yCanvas;
+	        this.x2CanvasLast = x2Canvas;
+	        this.y2CanvasLast = y2Canvas;
+	        this.isMultipleLast = isMultiple;
+	        // Scale for viewPort
+	        var u = (xCanvas / cvs.width);
+	        var v = (yCanvas / cvs.height);
+	        var x = u * this.width;
+	        var y = v * this.height;
+	        var u2 = (x2Canvas / cvs.width);
+	        var v2 = (y2Canvas / cvs.height);
+	        var x2 = u2 * this.width;
+	        var y2 = v2 * this.height;
+	        if (type === UserInputType.Move && this.isInputDown) {
+	            type = UserInputType.Drag;
+	        }
+	        if (isMultipleStart) {
+	            type = UserInputType.ChangeToMultipleStart;
+	            this.hasBeenMultiple = true;
+	            this.inputDownStart = Date.now();
+	            isMultiple = true;
+	        }
+	        else if (isMultipleEnd) {
+	            type = UserInputType.MultipleEnd;
+	            isMultiple = true;
+	        }
+	        else if (!isMultiple && this.hasBeenMultiple) {
+	            type = UserInputType.MultipleEndAfter;
+	            isMultiple = true;
+	        }
+	        var duration = Date.now() - (this.inputDownStart || Date.now());
+	        var zoomAmount = e.deltaY;
+	        this.onInput({ x: x, y: y, type: type, duration: duration, u: u, v: v, isMultiple: isMultiple, inputCount: inputCount, u2: u2, v2: v2, x2: x2, y2: y2, isTouch: isTouch, zoomAmount: zoomAmount });
+	        if (origType === UserInputType.Start) {
+	            this.isInputDown = true;
+	            this.inputDownStart = Date.now();
+	        }
+	        else if (origType === UserInputType.End && !isAnyTouch) {
+	            this.isInputDown = false;
+	            this.inputDownStart = null;
+	            this.hasBeenMultiple = false;
+	        }
+	        e.preventDefault();
+	        return false;
+	    };
+	    return CanvasAccess;
+	}());
+	exports.CanvasAccess = CanvasAccess;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var tslib_1 = __webpack_require__(1);
+	var canvas_access_1 = __webpack_require__(11);
+	var get_pictures_1 = __webpack_require__(16);
+	var randomize_1 = __webpack_require__(15);
+	var WordToPictureGame = (function () {
+	    function WordToPictureGame(canvasAccess, words) {
+	        var _this = this;
+	        this.canvasAccess = canvasAccess;
+	        this.words = words;
+	        this.attempt = 0;
+	        this.buttons = [];
+	        var _loop_1 = function (column) {
+	            var _loop_2 = function (row) {
+	                var _a = this_1.getButtonUV(column, row), u = _a.u, v = _a.v, uw = _a.uw, vh = _a.vh;
+	                this_1.buttons.push({
+	                    u: u + uw * 0.5,
+	                    v: v + vh * 0.5,
+	                    callback: function () {
+	                        _this.selectImage(column, row);
+	                    }
+	                });
+	            };
+	            for (var row = 0; row < 3; row++) {
+	                _loop_2(row);
+	            }
+	        };
+	        var this_1 = this;
+	        for (var column = 0; column < 3; column++) {
+	            _loop_1(column);
+	        }
+	        // Reload Button
+	        this.buttons.push({
+	            u: 0.5,
+	            v: 0,
+	            callback: function () {
+	                _this.attempt++;
+	                _this.loadWord();
+	            }
+	        });
+	    }
+	    WordToPictureGame.prototype.update = function (forceRedraw, input) {
+	        return tslib_1.__awaiter(this, void 0, void 0, function () {
+	            var _this = this;
+	            return tslib_1.__generator(this, function (_a) {
+	                switch (_a.label) {
+	                    case 0:
+	                        this.handleInput(input);
+	                        // Get Next Word
+	                        if (this.word) {
+	                            if (forceRedraw) {
+	                                requestAnimationFrame(function () {
+	                                    _this.draw(forceRedraw);
+	                                });
+	                            }
+	                            return [2 /*return*/];
+	                        }
+	                        if (!!this.word) return [3 /*break*/, 2];
+	                        this.word = this.words.getNextWord();
+	                        this.attempt = 0;
+	                        return [4 /*yield*/, this.loadWord()];
+	                    case 1:
+	                        _a.sent();
+	                        _a.label = 2;
+	                    case 2:
+	                        requestAnimationFrame(function () {
+	                            _this.draw(forceRedraw);
+	                        });
+	                        return [2 /*return*/];
+	                }
+	            });
+	        });
+	    };
+	    WordToPictureGame.prototype.loadWord = function () {
+	        return tslib_1.__awaiter(this, void 0, void 0, function () {
+	            var _this = this;
+	            var wordImageUrls, _loop_3, this_2, _i, _a, choice, _b, _c, c, image;
+	            return tslib_1.__generator(this, function (_d) {
+	                switch (_d.label) {
+	                    case 0:
+	                        // Draw blank
+	                        this.choices = null;
+	                        requestAnimationFrame(function () {
+	                            _this.draw(false);
+	                        });
+	                        wordImageUrls = [];
+	                        if (!(this.attempt <= 0)) return [3 /*break*/, 2];
+	                        return [4 /*yield*/, get_pictures_1.getPictures(this.word, 3, this.attempt)];
+	                    case 1:
+	                        wordImageUrls = _d.sent();
+	                        return [3 /*break*/, 5];
+	                    case 2:
+	                        if (!(this.attempt <= 4)) return [3 /*break*/, 4];
+	                        return [4 /*yield*/, get_pictures_1.getPictures(this.word, 9, this.attempt - 1)];
+	                    case 3:
+	                        wordImageUrls = _d.sent();
+	                        return [3 /*break*/, 5];
+	                    case 4:
+	                        // Fail
+	                        this.word = null;
+	                        setTimeout(function () {
+	                            _this.update(false);
+	                        });
+	                        return [2 /*return*/];
+	                    case 5:
+	                        this.choices = wordImageUrls.map(function (x) { return ({
+	                            word: _this.word,
+	                            imageUrl: x,
+	                            image: null
+	                        }); });
+	                        if (this.choices.length <= 0) {
+	                            this.word = null;
+	                            setTimeout(function () {
+	                                _this.update(false);
+	                            });
+	                            return [2 /*return*/];
+	                        }
+	                        if (!(this.attempt < 1)) return [3 /*break*/, 9];
+	                        _loop_3 = function (choice) {
+	                            var wrongWordImageUrls, _a;
+	                            return tslib_1.__generator(this, function (_b) {
+	                                switch (_b.label) {
+	                                    case 0: return [4 /*yield*/, get_pictures_1.getPictures(choice, 3)];
+	                                    case 1:
+	                                        wrongWordImageUrls = _b.sent();
+	                                        (_a = this_2.choices).push.apply(_a, wrongWordImageUrls.map(function (x) { return ({
+	                                            word: choice,
+	                                            imageUrl: x,
+	                                            image: null
+	                                        }); }));
+	                                        return [2 /*return*/];
+	                                }
+	                            });
+	                        };
+	                        this_2 = this;
+	                        _i = 0, _a = this.words.getChoices(this.word, 2);
+	                        _d.label = 6;
+	                    case 6:
+	                        if (!(_i < _a.length)) return [3 /*break*/, 9];
+	                        choice = _a[_i];
+	                        return [5 /*yield**/, _loop_3(choice)];
+	                    case 7:
+	                        _d.sent();
+	                        _d.label = 8;
+	                    case 8:
+	                        _i++;
+	                        return [3 /*break*/, 6];
+	                    case 9:
+	                        // Randomize
+	                        this.choices = randomize_1.randomize(this.choices);
+	                        for (_b = 0, _c = this.choices; _b < _c.length; _b++) {
+	                            c = _c[_b];
+	                            image = c.image = new Image();
+	                            image.src = c.imageUrl;
+	                            image.onload = function () {
+	                                requestAnimationFrame(function () {
+	                                    _this.draw(false);
+	                                });
+	                            };
+	                        }
+	                        return [2 /*return*/];
+	                }
+	            });
+	        });
+	    };
+	    WordToPictureGame.prototype.handleInput = function (input) {
+	        if (!input) {
+	            return;
+	        }
+	        if (input.type === canvas_access_1.UserInputType.Start) {
+	            if (this.buttons.length <= 0) {
+	                return;
+	            }
+	            console.log(input);
+	            var distances = this.buttons.map(function (b) { return ({
+	                b: b,
+	                distSq: (b.u - input.u) * (b.u - input.u) + (b.v - input.v) * (b.v - input.v)
+	            }); });
+	            var nearest = distances.reduce(function (out, b) { return out.distSq < b.distSq ? out : b; });
+	            this.targetButton = nearest.b;
+	            console.log(this.targetButton);
+	        }
+	        if (input.type === canvas_access_1.UserInputType.End) {
+	            this.targetButton && this.targetButton.callback();
+	            this.targetButton = null;
+	        }
+	    };
+	    WordToPictureGame.prototype.selectImage = function (column, row) {
+	        var _this = this;
+	        var i = column * 3 + row;
+	        console.log(i, this.choices[i]);
+	        var choice = this.choices[i];
+	        if (choice.isDisabled) {
+	            return;
+	        }
+	        var isRight = this.words.answer(this.word, choice.word);
+	        // TODO: Record Image Selection
+	        if (!isRight) {
+	            choice.isDisabled = true;
+	            // TODO: Only redraw mistake
+	            requestAnimationFrame(function () {
+	                _this.draw(true);
+	            });
+	            return;
+	        }
+	        this.word = null;
+	        setTimeout(function () {
+	            _this.update(false);
+	        });
+	    };
+	    WordToPictureGame.prototype.draw = function (forceRedraw) {
+	        var cvx = this.canvasAccess.canvas;
+	        var ctx = this.canvasAccess.context;
+	        var w = this.canvasAccess.width;
+	        var h = this.canvasAccess.height;
+	        //        if (forceRedraw) {
+	        ctx.clearRect(0, 0, w, h);
+	        //      }
+	        if (this.word) {
+	            var rect = ctx.measureText(this.word);
+	            ctx.fillStyle = '#FFFF00';
+	            ctx.font = '24px sans-serif';
+	            ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
+	        }
+	        if (this.choices) {
+	            for (var i = 0; i < this.choices.length; i++) {
+	                var choice = this.choices[i];
+	                var wordImage = choice.image;
+	                if (!wordImage.width) {
+	                    continue;
+	                }
+	                this.drawImage(wordImage, Math.floor(i / 3), i % 3, choice.isDisabled ? '#FF0000' : '#00FF00');
+	            }
+	        }
+	    };
+	    WordToPictureGame.prototype.getButtonUV = function (column, row) {
+	        var u = 0.05 + column * 0.3;
+	        var v = 0.15 + row * 0.25;
+	        var uw = 0.3 - 0.025;
+	        var vh = 0.25 - 0.025;
+	        return { u: u, v: v, uw: uw, vh: vh };
+	    };
+	    WordToPictureGame.prototype.drawImage = function (image, column, row, outlineColor) {
+	        if (outlineColor === void 0) { outlineColor = '#00FF00'; }
+	        var _a = this.getButtonUV(column, row), u = _a.u, v = _a.v, uw = _a.uw, vh = _a.vh;
+	        var w = this.canvasAccess.width;
+	        var h = this.canvasAccess.height;
+	        var ctx = this.canvasAccess.context;
+	        // Maintain Image Aspect Ratio
+	        var ws = w * uw;
+	        var hs = h * vh;
+	        var xs = w * u;
+	        var ys = h * v;
+	        var wi = image.width;
+	        var hi = image.height;
+	        var wScale = ws / wi;
+	        var hScale = hs / hi;
+	        var scale = Math.min(wScale, hScale);
+	        var wsNew = wi * scale;
+	        var hsNew = hi * scale;
+	        xs += (ws - wsNew) * 0.5;
+	        ys += (hs - hsNew) * 0.5;
+	        ws = wsNew;
+	        hs = hsNew;
+	        ctx.drawImage(image, 0, 0, wi, hi, xs, ys, ws, hs);
+	        ctx.strokeStyle = outlineColor;
+	        ctx.strokeRect(w * u, h * v, w * uw, h * vh);
+	        // console.log(column, row, u, v);
+	    };
+	    return WordToPictureGame;
+	}());
+	exports.WordToPictureGame = WordToPictureGame;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var tslib_1 = __webpack_require__(1);
+	var lib_1 = __webpack_require__(2);
+	lib_1.setupBrowser();
+	var http = lib_1.Platform.http();
+	var urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads';
+	var urlTemplateAlt = 'https://openclipart.org/search/json/?query={WORD}';
+	function getPictures(word, count, skip, shouldUseAlt) {
+	    if (count === void 0) { count = 10; }
+	    if (skip === void 0) { skip = 0; }
+	    if (shouldUseAlt === void 0) { shouldUseAlt = false; }
+	    return tslib_1.__awaiter(this, void 0, void 0, function () {
+	        var url, response, imageUrls;
+	        return tslib_1.__generator(this, function (_a) {
+	            switch (_a.label) {
+	                case 0:
+	                    url = urlTemplate;
+	                    if (shouldUseAlt) {
+	                        url = urlTemplateAlt;
+	                    }
+	                    return [4 /*yield*/, http.request(url.replace('{WORD}', word))];
+	                case 1:
+	                    response = _a.sent();
+	                    imageUrls = response.data.payload.map(function (x) { return x.svg.png_thumb; });
+	                    if (imageUrls.length > count) {
+	                        imageUrls = imageUrls.slice(skip, count);
+	                    }
+	                    return [2 /*return*/, imageUrls];
+	            }
+	        });
+	    });
+	}
+	exports.getPictures = getPictures;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	"use strict";
+	function loadUnixode(document) {
+	    var parts = document.split('### WORDS:');
+	    var mappings = parts[0].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
+	        var partsA = x.split(':');
+	        var partsB = partsA[1].split('=');
+	        var unixode = partsA[0];
+	        var english = partsB[0];
+	        var xharish = partsB[1];
+	        return {
+	            unixode: unixode,
+	            english: english,
+	            xharish: xharish,
+	        };
+	    });
+	    var lookup = {};
+	    mappings.forEach(function (x2) { return lookup[x2.unixode] = x2; });
+	    var words = parts[1].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
+	        var lookups = x.split('').filter(function (x2) { return x2.trim().length > 0; }).map(function (x2) { return lookup[x2]; });
+	        return {
+	            unixode: x,
+	            pairs: x.split('').map(function (x2) { return ({
+	                english: lookup[x2] ? lookup[x2].english : '',
+	                xharish: lookup[x2] ? lookup[x2].xharish : ''
+	            }); }).filter(function (x2) { return x2.english !== '' || x2.xharish !== ''; }),
+	            english: lookups.map(function (x2) { return x2.english; }).join(''),
+	            xharish: lookups.map(function (x2) { return x2.xharish; }).join(''),
+	        };
+	    });
+	    return {
+	        mappings: mappings,
+	        words: words
+	    };
+	}
+	exports.loadUnixode = loadUnixode;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	"use strict";
+	function randomize(items) {
+	    return items.map(function (x) { return ({ x: x, rand: Math.random() }); }).sort(function (a, b) { return a.rand - b.rand; }).map(function (x) { return x.x; });
+	}
+	exports.randomize = randomize;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var tslib_1 = __webpack_require__(1);
+	var OCA = __webpack_require__(13);
+	var PB = __webpack_require__(17);
+	function getPictures(word, count, attempt) {
+	    if (count === void 0) { count = 10; }
+	    if (attempt === void 0) { attempt = 0; }
+	    return tslib_1.__awaiter(this, void 0, void 0, function () {
+	        return tslib_1.__generator(this, function (_a) {
+	            // if (attempt === 0) {
+	            // Get Official Pictures
+	            // } else 
+	            if (attempt <= 0) {
+	                return [2 /*return*/, OCA.getPictures(word, count, count * (attempt - 0))];
+	            }
+	            else {
+	                return [2 /*return*/, PB.getPictures(word, count, count * (attempt - 2))];
+	            }
+	            return [2 /*return*/];
+	        });
+	    });
+	}
+	exports.getPictures = getPictures;
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var tslib_1 = __webpack_require__(1);
+	var lib_1 = __webpack_require__(2);
+	lib_1.setupBrowser();
+	var http = lib_1.Platform.http();
+	var apiKey = '4473112-a196654cdbdfffe7ac8adcf39';
+	var urlTemplate = "https://pixabay.com/api/?key=" + apiKey + "&q={WORD}&image_type=all&safesearch=true";
+	var attribution = "\n<a href=\"https://pixabay.com/\">\n\u00A0\u00A0\u00A0\u00A0<img src=\"https://pixabay.com/static/img/public/medium_rectangle_a.png\" alt=\"Pixabay\">\n</a>\n";
+	function getPictures(word, count, skip) {
+	    if (count === void 0) { count = 10; }
+	    if (skip === void 0) { skip = 0; }
+	    return tslib_1.__awaiter(this, void 0, void 0, function () {
+	        var url, response, imageUrls;
+	        return tslib_1.__generator(this, function (_a) {
+	            switch (_a.label) {
+	                case 0:
+	                    url = urlTemplate;
+	                    return [4 /*yield*/, http.request(url.replace('{WORD}', word))];
+	                case 1:
+	                    response = _a.sent();
+	                    imageUrls = response.data.hits.map(function (x) { return x.webformatURL; });
+	                    if (imageUrls.length > count) {
+	                        imageUrls = imageUrls.slice(skip, count);
+	                    }
+	                    return [2 /*return*/, imageUrls];
+	            }
+	        });
+	    });
+	}
+	exports.getPictures = getPictures;
+
 
 /***/ }
 /******/ ]);

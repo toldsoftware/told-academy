@@ -1,0 +1,168 @@
+import { KnowledgeDomain, KnowledgeState, KnowledgeScore, calculatePriority, createComponentsFromProblems } from './../src/';
+import { createSpellingProblem } from './../src/problems/spelling';
+import { Ajax } from './ajax';
+import { loadUnixode } from './unixode-loader';
+import { forprops } from './../src/utils';
+
+let domain: KnowledgeDomain = null;
+let state: KnowledgeState = null;
+let host: HTMLDivElement = null;
+
+(window as any)['__debug'] = () => ({
+    domain, state, host,
+    getProblems: (key: string) => {
+        return domain.problems.filter(x => x.name.toUpperCase() === key.toUpperCase())
+            .map(x => ({ ...x, componentsObjects: x.componentNames.map(c => domain.components.lookup[c]) }));
+    }
+});
+
+function setup() {
+    let input = document.createElement('input') as HTMLInputElement;
+    document.body.appendChild(input);
+    input.type = 'text';
+    input.onchange = () => addProblem(input.value);
+
+    host = document.createElement('div');
+    document.body.appendChild(host);
+
+    let ajax = new Ajax();
+    ajax.get('/Words_UniXode_Kids.txt', r => {
+        setTimeout(() => {
+            // ajax.get('/Words_UniXode.txt', r => {
+            let result = loadUnixode(r);
+            let words = result.words.map(x => x.pairs.map(x2 => ({ letters: x2.english, sound: x2.xharish })));
+            let problems = words.map(x => createSpellingProblem(x));
+            let comps = createComponentsFromProblems(problems);
+
+            // let excComps = [] as any;
+            // for (let k in comps) {
+            //     if (Object.getOwnPropertyNames(comps[k].exclusives).length === 0) { continue; }
+            //     excComps.push(comps[k]);
+            // }
+            // console.log(excComps);
+
+            console.log(problems.filter(x => x.conflict > 0));
+
+            domain = { components: comps, problems: problems, hasCalculatedConflict: false, hasCalculatedOccurences: false };
+            domain.problems.forEach(p => (p as any)['component_obj'] = p.componentNames.map(x => domain.components.lookup[x]));
+
+            state = { focus: '', components: {} };
+            showPriority();
+        });
+    }, err => console.warn(err));
+}
+
+function showPriority() {
+    calculatePriority(domain, state, masterProblemNumber);
+
+    let html = '';
+    let p = domain.problems.map(x => x);
+    p.sort((a, b) => b.userPriority - a.userPriority);
+
+    let pTop = p.slice(0, 100);
+    pTop.forEach(x => {
+        html += `<div style='margin-left: 0px'>
+'${x.name}' 
+priority=${formatNumber(x.userPriority)}
+</div>`;
+        html += `<div style='margin-left: 20px'>
+value=${formatNumber(x.userValue)}
+userProblemsUntilRepeat=${formatNumber(x.userProblemsUntilRepeat)}
+</div>`;
+        html += `<div style='margin-left: 20px'>
+conflict=${formatNumber(x.conflict, 10000)}
+diff=${formatNumber(x.userDifficulty)} 
+</div>`;
+        html += `<div style='margin-left: 20px'>*
+conflict=${formatNumber(x.conflict_ignoreFocus, 10000)}
+diff=${formatNumber(x.userDifficulty_ignoreFocus)} 
+</div>`;
+        html += `<div style='margin-left: 20px'>R
+conflict=${formatNumber(x.conflict / x.conflict_ignoreFocus, 10000)}
+diff=${formatNumber(x.userDifficulty / x.userDifficulty_ignoreFocus)} 
+</div>`;
+
+        html += `<div style='margin-left: 20px'>
+componentCount=${formatNumber(x.componentCount)}
+missingCount=${formatNumber(x.missingCount)}
+uniqueCount=${formatNumber(x.uniqueCount)} 
+</div>`;
+
+        html += `<div style='margin-left: 20px'>*
+componentCount=${formatNumber(x.componentCount_ignoreFocus)}
+missingCount=${formatNumber(x.missingCount_ignoreFocus)}
+uniqueCount=${formatNumber(x.uniqueCount_ignoreFocus)} 
+
+</div>`;
+
+        x.exclusives.forEach(exc => {
+            html += `<div style='margin-left:60px'>EXC
+'${exc.type}': 
+${exc.items.join(', ')}
+</div>`;
+        });
+
+        forprops(x.components, (pComp, c) => {
+            let comp = pComp.component;
+            let cState = state.components[c] || {} as KnowledgeScore;
+
+            // conflict=${formatNumber(comp.conflict)}
+            html += `<div style='margin-left: 40px'>COMP
+'${c}'
+priority=${formatNumber(comp.userPriority)}
+score=${formatNumber((cState.score || 0))}
+pConflict=${formatNumber(pComp.conflict, 10000)}
+value=${formatNumber(comp.userValue)}
+occurences=${formatNumber(comp.occurences)}
+</div>`;
+
+            if (pComp.exclusivesInfo) {
+                pComp.exclusivesInfo.forEach(exc => {
+                    html += `<div style='margin-left: 100px'>EXC-INFO 
+'${exc.type}' 
+inCount=${formatNumber(exc.inProblemCount)}
+inProblemOccurences=${formatNumber(exc.inProblemOccurences)}
+outProblemOccurences=${formatNumber(exc.outProblemOccurences)}
+<div style='margin-left: 120px'>IN: ${exc.inProblem.reduce((out, x) => out += x.name + ', ', '')}</div> 
+<div style='margin-left: 120px'>OUT: ${exc.outProblem.reduce((out, x) => out += x.name + ', ', '')}</div>
+</div>`;
+                });
+            }
+        });
+    });
+    host.innerHTML = html;
+}
+
+function formatNumber(n: number, rounder = 100) {
+    let color = n < 0 ? '#CC0000'
+        : n > 1 ? '#0000CC'
+            : n > 0 ? '#00CC00'
+                : '#000000';
+    return `<span style='color:${color}'>${Math.round(n * rounder) / rounder}</span>`;
+}
+
+let masterProblemNumber = 100;
+
+function addProblem(key: string) {
+    console.log('addProblem', key, state);
+    key = key.toUpperCase();
+
+    let p = domain.problems.filter(x => x.name === key);
+    p.sort((a, b) => b.userPriority - a.userPriority);
+
+    if (p[0]) {
+        p[0].componentNames.forEach(x => {
+            let c = domain.components.lookup[x];
+            let s = state.components[x];
+            if (!s) { s = state.components[x] = { right: 0, wrong: 0, score: 0 }; }
+            s.right++;
+            s.score = s.score * 0.5 + 0.5;
+            if (s.score >= 0.75 && s.wrong === 0) { s.score = 1; }
+            s.lastRightProblemNumber = masterProblemNumber++;
+        });
+    }
+
+    showPriority();
+}
+
+setup();

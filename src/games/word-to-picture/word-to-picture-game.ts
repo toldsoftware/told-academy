@@ -1,9 +1,8 @@
 import { CanvasGame } from '../../canvas-game';
 import { UserInput, UserInputType, CanvasAccess } from '../../canvas-access';
-import { getPictures } from './get-pictures-open-clip-art';
+import { getPictures } from './get-pictures';
+import { randomize } from '../../randomize';
 
-
-let TEMP_WORDS = ['touch', 'zebra', 'keyboard', 'car', 'cat', 'hat', 'dog'];
 
 interface Button {
     u: number;
@@ -11,19 +10,22 @@ interface Button {
     callback: () => void;
 }
 
+export interface WordProvider {
+    getNextWord(): string;
+    getChoices(word: string, choiceCount: number): string[];
+    answer(word: string, answer: string): boolean;
+}
 
-export class Game implements CanvasGame {
+export class WordToPictureGame implements CanvasGame {
 
-    words: string[];
-    iWord: number;
     word: string;
-    wordImageUrls: string[];
-    wordImages: HTMLImageElement[];
+    choices: { word: string, imageUrl: string, image: HTMLImageElement, isDisabled?: boolean }[];
 
     private buttons: Button[];
     private targetButton: Button;
+    private attempt = 0;
 
-    constructor(private canvasAccess: CanvasAccess) {
+    constructor(private canvasAccess: CanvasAccess, private words: WordProvider) {
         this.buttons = [];
         for (let column = 0; column < 3; column++) {
             for (let row = 0; row < 3; row++) {
@@ -38,6 +40,16 @@ export class Game implements CanvasGame {
                 });
             }
         }
+
+        // Reload Button
+        this.buttons.push({
+            u: 0.5,
+            v: 0,
+            callback: () => {
+                this.attempt++;
+                this.loadWord();
+            }
+        });
     }
 
     async update(forceRedraw: boolean, input?: UserInput) {
@@ -54,43 +66,78 @@ export class Game implements CanvasGame {
             return;
         }
 
-        if (!this.words) {
-            // TODO: Get Word List
-            this.words = TEMP_WORDS;
-            this.iWord = -1;
-        }
-
         // Get next word
         if (!this.word) {
-            this.iWord++;
-            if (this.iWord >= this.words.length) {
-                this.iWord = 0;
-            }
-            this.word = this.words[this.iWord];
+            this.word = this.words.getNextWord();
+            this.attempt = 0;
 
-            // Get word images
-            this.wordImageUrls = await getPictures(this.word);
-            this.wordImages = [];
-            if (this.wordImageUrls.length > 9) {
-                this.wordImageUrls = this.wordImageUrls.slice(0, 9);
-            }
-
-            for (let i = 0; i < this.wordImageUrls.length; i++) {
-                let url = this.wordImageUrls[i];
-
-                let image = this.wordImages[i] = new Image();
-                image.src = url;
-                image.onload = () => {
-                    requestAnimationFrame(() => {
-                        this.draw(false);
-                    });
-                };
-            }
+            await this.loadWord();
         }
 
         requestAnimationFrame(() => {
             this.draw(forceRedraw);
         });
+    }
+
+    async loadWord() {
+        // Draw blank
+        this.choices = null;
+        requestAnimationFrame(() => {
+            this.draw(false);
+        });
+
+        // Get word images
+
+        let wordImageUrls: string[] = [];
+        if (this.attempt <= 0) { wordImageUrls = await getPictures(this.word, 3, this.attempt); }
+        else if (this.attempt <= 4) { wordImageUrls = await getPictures(this.word, 9, this.attempt - 1); }
+        else {
+            // Fail
+            this.word = null;
+            setTimeout(() => {
+                this.update(false);
+            });
+            return;
+        }
+
+        this.choices = wordImageUrls.map(x => ({
+            word: this.word,
+            imageUrl: x,
+            image: null
+        }));
+
+        if (this.choices.length <= 0) {
+            this.word = null;
+            setTimeout(() => {
+                this.update(false);
+            });
+            return;
+        }
+
+        // Add Wrong Choices
+        if (this.attempt < 1) {
+            for (let choice of this.words.getChoices(this.word, 2)) {
+                let wrongWordImageUrls = await getPictures(choice, 3);
+                this.choices.push(...wrongWordImageUrls.map(x => ({
+                    word: choice,
+                    imageUrl: x,
+                    image: null
+                })));
+            }
+        }
+
+        // Randomize
+        this.choices = randomize(this.choices);
+
+        for (let c of this.choices) {
+            let image = c.image = new Image();
+            image.src = c.imageUrl;
+            image.onload = () => {
+                requestAnimationFrame(() => {
+                    this.draw(false);
+                });
+            };
+        }
     }
 
     handleInput(input: UserInput) {
@@ -120,14 +167,32 @@ export class Game implements CanvasGame {
 
     selectImage(column: number, row: number) {
         let i = column * 3 + row;
-        console.log(i, this.wordImages[i], this.wordImageUrls[i]);
+        console.log(i, this.choices[i]);
+
+        let choice = this.choices[i];
+        if (choice.isDisabled) {
+            return;
+        }
+
+        let isRight = this.words.answer(this.word, choice.word);
 
         // TODO: Record Image Selection
+
+
+
+        if (!isRight) {
+            choice.isDisabled = true;
+
+            // TODO: Only redraw mistake
+            requestAnimationFrame(() => {
+                this.draw(true);
+            });
+            return;
+        }
+
         this.word = null;
-        this.wordImages = null;
-        this.wordImageUrls = null;
-        requestAnimationFrame(() => {
-            this.draw(false);
+        setTimeout(() => {
+            this.update(false);
         });
     }
 
@@ -148,12 +213,13 @@ export class Game implements CanvasGame {
             ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
         }
 
-        if (this.wordImages) {
-            for (let i = 0; i < this.wordImages.length; i++) {
-                let wordImage = this.wordImages[i];
+        if (this.choices) {
+            for (let i = 0; i < this.choices.length; i++) {
+                let choice = this.choices[i];
+                let wordImage = choice.image;
                 if (!wordImage.width) { continue; }
 
-                this.drawImage(wordImage, Math.floor(i / 3), i % 3);
+                this.drawImage(wordImage, Math.floor(i / 3), i % 3, choice.isDisabled ? '#FF0000' : '#00FF00');
             }
         }
     }
@@ -166,7 +232,7 @@ export class Game implements CanvasGame {
         return { u, v, uw, vh };
     }
 
-    drawImage(image: HTMLImageElement, column: number, row: number) {
+    drawImage(image: HTMLImageElement, column: number, row: number, outlineColor = '#00FF00') {
 
         let { u, v, uw, vh } = this.getButtonUV(column, row);
 
@@ -196,7 +262,7 @@ export class Game implements CanvasGame {
 
         ctx.drawImage(image, 0, 0, wi, hi, xs, ys, ws, hs);
 
-        ctx.strokeStyle = '#CCCCCC';
+        ctx.strokeStyle = outlineColor;
         ctx.strokeRect(w * u, h * v, w * uw, h * vh);
 
         // console.log(column, row, u, v);

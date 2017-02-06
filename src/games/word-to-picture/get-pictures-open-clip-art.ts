@@ -4,6 +4,7 @@ setupBrowser();
 let http = Platform.http();
 
 const urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads';
+const urlTemplateAlt = 'https://openclipart.org/search/json/?query={WORD}';
 
 interface OpenClipArtResponse {
     msg: 'success';
@@ -26,7 +27,7 @@ interface OpenClipArtResponse {
         // created: '2009-03-09 13:31:04',
         svg: {
             // url: 'https://openclipart.org/download/21992/nicubunu-Soccer-ball.svg',
-            png_thumb: 'https://openclipart.org/image/250px/svg_to_png/21992/nicubunu-Soccer-ball.png',
+            png_thumb: string; // 'https://openclipart.org/image/250px/svg_to_png/21992/nicubunu-Soccer-ball.png',
             // png_full_lossy: 'https://openclipart.org/image/800px/svg_to_png/21992/nicubunu-Soccer-ball.png',
             // png_2400px: 'https://openclipart.org/image/2400px/svg_to_png/21992/nicubunu-Soccer-ball.png'
         },
@@ -44,10 +45,20 @@ interface OpenClipArtResponse {
     }[];
 }
 
-export async function getPictures(word: string) {
+export async function getPictures(word: string, count = 10, skip = 0, shouldUseAlt = false) {
 
-    let response = await http.request<OpenClipArtResponse>(urlTemplate.replace('{WORD}', word));
+    let url = urlTemplate;
+
+    if (shouldUseAlt) {
+        url = urlTemplateAlt;
+    }
+
+    let response = await http.request<OpenClipArtResponse>(url.replace('{WORD}', word));
     let imageUrls = response.data.payload.map(x => x.svg.png_thumb);
+
+    if (imageUrls.length > count) {
+        imageUrls = imageUrls.slice(skip, count);
+    }
 
     return imageUrls;
 }
