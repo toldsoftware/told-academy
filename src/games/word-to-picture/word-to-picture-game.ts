@@ -25,6 +25,8 @@ export class WordToPictureGame implements CanvasGame {
     private targetButton: Button;
     private attempt = 0;
 
+    private isReadyButtonVisible = false;
+
     constructor(private canvasAccess: CanvasAccess, private words: WordProvider) {
         this.buttons = [];
         for (let column = 0; column < 3; column++) {
@@ -35,6 +37,11 @@ export class WordToPictureGame implements CanvasGame {
                     u: u + uw * 0.5,
                     v: v + vh * 0.5,
                     callback: () => {
+                        if (this.isReadyButtonVisible) {
+                            this.loadWord();
+                            return;
+                        }
+
                         this.selectImage(column, row);
                     }
                 });
@@ -46,10 +53,27 @@ export class WordToPictureGame implements CanvasGame {
             u: 0.5,
             v: 0,
             callback: () => {
+                if (this.isReadyButtonVisible) {
+                    this.loadWord();
+                    return;
+                }
+
                 this.attempt++;
                 this.loadWord();
             }
         });
+
+
+        // // Ready Button
+        // this.buttons.push({
+        //     u: 0.5,
+        //     v: 0.5,
+        //     callback: () => {
+        //         if (this.isReadyButtonVisible) {
+        //             this.loadWord();
+        //         }
+        //     }
+        // });
     }
 
     async update(forceRedraw: boolean, input?: UserInput) {
@@ -71,7 +95,7 @@ export class WordToPictureGame implements CanvasGame {
             this.word = this.words.getNextWord();
             this.attempt = 0;
 
-            await this.loadWord();
+            await this.startWord();
         }
 
         requestAnimationFrame(() => {
@@ -79,9 +103,19 @@ export class WordToPictureGame implements CanvasGame {
         });
     }
 
+    async startWord() {
+        // Draw the word alone
+        this.choices = null;
+        this.isReadyButtonVisible = true;
+        requestAnimationFrame(() => {
+            this.draw(false);
+        });
+    }
+
     async loadWord() {
         // Draw blank
         this.choices = null;
+        this.isReadyButtonVisible = false;
         requestAnimationFrame(() => {
             this.draw(false);
         });
@@ -207,10 +241,22 @@ export class WordToPictureGame implements CanvasGame {
         //      }
 
         if (this.word) {
-            let rect = ctx.measureText(this.word);
             ctx.fillStyle = '#FFFF00';
-            ctx.font = '24px sans-serif';
-            ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
+
+            if (!this.isReadyButtonVisible) {
+                ctx.font = '24px sans-serif';
+                let rect = ctx.measureText(this.word);
+                ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
+            } else {
+                ctx.font = '48px sans-serif';
+                let rect = ctx.measureText(this.word);
+                ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.4);
+
+                // ctx.font = '48px sans-serif';
+                // rect = ctx.measureText('>');
+                // ctx.fillText('>', w * 0.5 - rect.width * 0.5, h * 0.75);
+            }
+
         }
 
         if (this.choices) {

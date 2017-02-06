@@ -18,8 +18,10 @@ export declare class WordToPictureGame implements CanvasGame {
     private buttons;
     private targetButton;
     private attempt;
+    private isReadyButtonVisible;
     constructor(canvasAccess: CanvasAccess, words: WordProvider);
     update(forceRedraw: boolean, input?: UserInput): Promise<void>;
+    startWord(): Promise<void>;
     loadWord(): Promise<void>;
     handleInput(input: UserInput): void;
     selectImage(column: number, row: number): void;

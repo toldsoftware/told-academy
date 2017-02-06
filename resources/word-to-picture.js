@@ -47,10 +47,10 @@
 	"use strict";
 	var tslib_1 = __webpack_require__(1);
 	var lib_1 = __webpack_require__(2);
-	var randomize_1 = __webpack_require__(15);
-	var canvas_game_1 = __webpack_require__(10);
-	var unixode_loader_1 = __webpack_require__(14);
-	var word_to_picture_game_1 = __webpack_require__(12);
+	var randomize_1 = __webpack_require__(10);
+	var canvas_game_1 = __webpack_require__(11);
+	var unixode_loader_1 = __webpack_require__(13);
+	var word_to_picture_game_1 = __webpack_require__(14);
 	lib_1.setupBrowser();
 	var http = lib_1.Platform.http();
 	function setup() {
@@ -1906,10 +1906,21 @@
 
 /***/ },
 /* 10 */
+/***/ function(module, exports) {
+
+	"use strict";
+	function randomize(items) {
+	    return items.map(function (x) { return ({ x: x, rand: Math.random() }); }).sort(function (a, b) { return a.rand - b.rand; }).map(function (x) { return x.x; });
+	}
+	exports.randomize = randomize;
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var canvas_access_1 = __webpack_require__(11);
+	var canvas_access_1 = __webpack_require__(12);
 	function hostCanvasGame(host, gameFactory) {
 	    var access = new canvas_access_1.CanvasAccess(host, function (input) {
 	        game && game.update(false, input).then();
@@ -1923,7 +1934,7 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2058,20 +2069,62 @@
 
 
 /***/ },
-/* 12 */
+/* 13 */
+/***/ function(module, exports) {
+
+	"use strict";
+	function loadUnixode(document) {
+	    var parts = document.split('### WORDS:');
+	    var mappings = parts[0].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
+	        var partsA = x.split(':');
+	        var partsB = partsA[1].split('=');
+	        var unixode = partsA[0];
+	        var english = partsB[0];
+	        var xharish = partsB[1];
+	        return {
+	            unixode: unixode,
+	            english: english,
+	            xharish: xharish,
+	        };
+	    });
+	    var lookup = {};
+	    mappings.forEach(function (x2) { return lookup[x2.unixode] = x2; });
+	    var words = parts[1].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
+	        var lookups = x.split('').filter(function (x2) { return x2.trim().length > 0; }).map(function (x2) { return lookup[x2]; });
+	        return {
+	            unixode: x,
+	            pairs: x.split('').map(function (x2) { return ({
+	                english: lookup[x2] ? lookup[x2].english : '',
+	                xharish: lookup[x2] ? lookup[x2].xharish : ''
+	            }); }).filter(function (x2) { return x2.english !== '' || x2.xharish !== ''; }),
+	            english: lookups.map(function (x2) { return x2.english; }).join(''),
+	            xharish: lookups.map(function (x2) { return x2.xharish; }).join(''),
+	        };
+	    });
+	    return {
+	        mappings: mappings,
+	        words: words
+	    };
+	}
+	exports.loadUnixode = loadUnixode;
+
+
+/***/ },
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var tslib_1 = __webpack_require__(1);
-	var canvas_access_1 = __webpack_require__(11);
-	var get_pictures_1 = __webpack_require__(16);
-	var randomize_1 = __webpack_require__(15);
+	var canvas_access_1 = __webpack_require__(12);
+	var get_pictures_1 = __webpack_require__(15);
+	var randomize_1 = __webpack_require__(10);
 	var WordToPictureGame = (function () {
 	    function WordToPictureGame(canvasAccess, words) {
 	        var _this = this;
 	        this.canvasAccess = canvasAccess;
 	        this.words = words;
 	        this.attempt = 0;
+	        this.isReadyButtonVisible = false;
 	        this.buttons = [];
 	        var _loop_1 = function (column) {
 	            var _loop_2 = function (row) {
@@ -2080,6 +2133,10 @@
 	                    u: u + uw * 0.5,
 	                    v: v + vh * 0.5,
 	                    callback: function () {
+	                        if (_this.isReadyButtonVisible) {
+	                            _this.loadWord();
+	                            return;
+	                        }
 	                        _this.selectImage(column, row);
 	                    }
 	                });
@@ -2097,10 +2154,24 @@
 	            u: 0.5,
 	            v: 0,
 	            callback: function () {
+	                if (_this.isReadyButtonVisible) {
+	                    _this.loadWord();
+	                    return;
+	                }
 	                _this.attempt++;
 	                _this.loadWord();
 	            }
 	        });
+	        // // Ready Button
+	        // this.buttons.push({
+	        //     u: 0.5,
+	        //     v: 0.5,
+	        //     callback: () => {
+	        //         if (this.isReadyButtonVisible) {
+	        //             this.loadWord();
+	        //         }
+	        //     }
+	        // });
 	    }
 	    WordToPictureGame.prototype.update = function (forceRedraw, input) {
 	        return tslib_1.__awaiter(this, void 0, void 0, function () {
@@ -2121,7 +2192,7 @@
 	                        if (!!this.word) return [3 /*break*/, 2];
 	                        this.word = this.words.getNextWord();
 	                        this.attempt = 0;
-	                        return [4 /*yield*/, this.loadWord()];
+	                        return [4 /*yield*/, this.startWord()];
 	                    case 1:
 	                        _a.sent();
 	                        _a.label = 2;
@@ -2134,6 +2205,20 @@
 	            });
 	        });
 	    };
+	    WordToPictureGame.prototype.startWord = function () {
+	        return tslib_1.__awaiter(this, void 0, void 0, function () {
+	            var _this = this;
+	            return tslib_1.__generator(this, function (_a) {
+	                // Draw the word alone
+	                this.choices = null;
+	                this.isReadyButtonVisible = true;
+	                requestAnimationFrame(function () {
+	                    _this.draw(false);
+	                });
+	                return [2 /*return*/];
+	            });
+	        });
+	    };
 	    WordToPictureGame.prototype.loadWord = function () {
 	        return tslib_1.__awaiter(this, void 0, void 0, function () {
 	            var _this = this;
@@ -2143,6 +2228,7 @@
 	                    case 0:
 	                        // Draw blank
 	                        this.choices = null;
+	                        this.isReadyButtonVisible = false;
 	                        requestAnimationFrame(function () {
 	                            _this.draw(false);
 	                        });
@@ -2280,10 +2366,17 @@
 	        ctx.clearRect(0, 0, w, h);
 	        //      }
 	        if (this.word) {
-	            var rect = ctx.measureText(this.word);
 	            ctx.fillStyle = '#FFFF00';
-	            ctx.font = '24px sans-serif';
-	            ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
+	            if (!this.isReadyButtonVisible) {
+	                ctx.font = '24px sans-serif';
+	                var rect = ctx.measureText(this.word);
+	                ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
+	            }
+	            else {
+	                ctx.font = '48px sans-serif';
+	                var rect = ctx.measureText(this.word);
+	                ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.4);
+	            }
 	        }
 	        if (this.choices) {
 	            for (var i = 0; i < this.choices.length; i++) {
@@ -2336,7 +2429,36 @@
 
 
 /***/ },
-/* 13 */
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var tslib_1 = __webpack_require__(1);
+	var OCA = __webpack_require__(16);
+	var PB = __webpack_require__(17);
+	function getPictures(word, count, attempt) {
+	    if (count === void 0) { count = 10; }
+	    if (attempt === void 0) { attempt = 0; }
+	    return tslib_1.__awaiter(this, void 0, void 0, function () {
+	        return tslib_1.__generator(this, function (_a) {
+	            // if (attempt === 0) {
+	            // Get Official Pictures
+	            // } else 
+	            if (attempt <= 0) {
+	                return [2 /*return*/, OCA.getPictures(word, count, count * (attempt - 0))];
+	            }
+	            else {
+	                return [2 /*return*/, PB.getPictures(word, count, count * (attempt - 2))];
+	            }
+	            return [2 /*return*/];
+	        });
+	    });
+	}
+	exports.getPictures = getPictures;
+
+
+/***/ },
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2368,87 +2490,6 @@
 	                    }
 	                    return [2 /*return*/, imageUrls];
 	            }
-	        });
-	    });
-	}
-	exports.getPictures = getPictures;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports) {
-
-	"use strict";
-	function loadUnixode(document) {
-	    var parts = document.split('### WORDS:');
-	    var mappings = parts[0].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
-	        var partsA = x.split(':');
-	        var partsB = partsA[1].split('=');
-	        var unixode = partsA[0];
-	        var english = partsB[0];
-	        var xharish = partsB[1];
-	        return {
-	            unixode: unixode,
-	            english: english,
-	            xharish: xharish,
-	        };
-	    });
-	    var lookup = {};
-	    mappings.forEach(function (x2) { return lookup[x2.unixode] = x2; });
-	    var words = parts[1].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
-	        var lookups = x.split('').filter(function (x2) { return x2.trim().length > 0; }).map(function (x2) { return lookup[x2]; });
-	        return {
-	            unixode: x,
-	            pairs: x.split('').map(function (x2) { return ({
-	                english: lookup[x2] ? lookup[x2].english : '',
-	                xharish: lookup[x2] ? lookup[x2].xharish : ''
-	            }); }).filter(function (x2) { return x2.english !== '' || x2.xharish !== ''; }),
-	            english: lookups.map(function (x2) { return x2.english; }).join(''),
-	            xharish: lookups.map(function (x2) { return x2.xharish; }).join(''),
-	        };
-	    });
-	    return {
-	        mappings: mappings,
-	        words: words
-	    };
-	}
-	exports.loadUnixode = loadUnixode;
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports) {
-
-	"use strict";
-	function randomize(items) {
-	    return items.map(function (x) { return ({ x: x, rand: Math.random() }); }).sort(function (a, b) { return a.rand - b.rand; }).map(function (x) { return x.x; });
-	}
-	exports.randomize = randomize;
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var tslib_1 = __webpack_require__(1);
-	var OCA = __webpack_require__(13);
-	var PB = __webpack_require__(17);
-	function getPictures(word, count, attempt) {
-	    if (count === void 0) { count = 10; }
-	    if (attempt === void 0) { attempt = 0; }
-	    return tslib_1.__awaiter(this, void 0, void 0, function () {
-	        return tslib_1.__generator(this, function (_a) {
-	            // if (attempt === 0) {
-	            // Get Official Pictures
-	            // } else 
-	            if (attempt <= 0) {
-	                return [2 /*return*/, OCA.getPictures(word, count, count * (attempt - 0))];
-	            }
-	            else {
-	                return [2 /*return*/, PB.getPictures(word, count, count * (attempt - 2))];
-	            }
-	            return [2 /*return*/];
 	        });
 	    });
 	}
