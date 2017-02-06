@@ -63,11 +63,133 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 17);
+/******/ 	return __webpack_require__(__webpack_require__.s = 21);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (immutable) */ __webpack_exports__["__extends"] = __extends;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__assign", function() { return __assign; });
+/* harmony export (immutable) */ __webpack_exports__["__rest"] = __rest;
+/* harmony export (immutable) */ __webpack_exports__["__decorate"] = __decorate;
+/* harmony export (immutable) */ __webpack_exports__["__param"] = __param;
+/* harmony export (immutable) */ __webpack_exports__["__metadata"] = __metadata;
+/* harmony export (immutable) */ __webpack_exports__["__awaiter"] = __awaiter;
+/* harmony export (immutable) */ __webpack_exports__["__generator"] = __generator;
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = Object.assign || function __assign(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+};
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+};
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+function __param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+};
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
+    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+__export(__webpack_require__(17));
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -203,19 +325,19 @@ exports.CanvasAccess = CanvasAccess;
 
 
 /***/ }),
-/* 1 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+function randomize(items) {
+    return items.map(function (x) { return ({ x: x, rand: Math.random() }); }).sort(function (a, b) { return a.rand - b.rand; }).map(function (x) { return x.x; });
 }
-__export(__webpack_require__(13));
+exports.randomize = randomize;
 
 
 /***/ }),
-/* 2 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -231,140 +353,66 @@ exports.Platform = Platform;
 
 
 /***/ }),
-/* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (immutable) */ __webpack_exports__["__extends"] = __extends;
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__assign", function() { return __assign; });
-/* harmony export (immutable) */ __webpack_exports__["__rest"] = __rest;
-/* harmony export (immutable) */ __webpack_exports__["__decorate"] = __decorate;
-/* harmony export (immutable) */ __webpack_exports__["__param"] = __param;
-/* harmony export (immutable) */ __webpack_exports__["__metadata"] = __metadata;
-/* harmony export (immutable) */ __webpack_exports__["__awaiter"] = __awaiter;
-/* harmony export (immutable) */ __webpack_exports__["__generator"] = __generator;
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-
-function __extends(d, b) {
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-var __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-    }
-    return t;
-};
-
-function __rest(s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-            t[p[i]] = s[p[i]];
-    return t;
-};
-
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-
-function __param(paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-
-function __metadata(metadataKey, metadataValue) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-};
-
-function __awaiter(thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-function __generator(thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var canvas_game_1 = __webpack_require__(6);
-var game_1 = __webpack_require__(7);
-function setup() {
-    var host = document.getElementById('host');
-    canvas_game_1.hostGame(host, function (access) { return new game_1.Game(access); });
-}
-setup();
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var _1 = __webpack_require__(1);
-var resolve_url_1 = __webpack_require__(9);
-_1.setupBrowser();
-_1.Platform.urlResolver = resolve_url_1.resolveUrlClient;
+var tslib_1 = __webpack_require__(0);
+var lib_1 = __webpack_require__(1);
+var randomize_1 = __webpack_require__(3);
+var canvas_game_1 = __webpack_require__(7);
+var unixode_loader_1 = __webpack_require__(12);
+var word_to_picture_game_1 = __webpack_require__(11);
+lib_1.setupBrowser();
+var http = lib_1.Platform.http();
+function setup() {
+    var _this = this;
+    (function () { return tslib_1.__awaiter(_this, void 0, void 0, function () {
+        var host, doc, list, wordProvider;
+        return tslib_1.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    host = document.getElementById('host');
+                    return [4 /*yield*/, http.request('./subjects/Words_UniXode_Kids.txt')];
+                case 1:
+                    doc = (_a.sent()).dataRaw;
+                    list = unixode_loader_1.loadUnixode(doc);
+                    wordProvider = new SimpleWordProvider();
+                    wordProvider.words = list.words.map(function (x) { return x.english.toLowerCase(); });
+                    // TODO: Order Word List (Use Knowldge Tree?)
+                    wordProvider.words = randomize_1.randomize(wordProvider.words);
+                    // TEMP Order by length
+                    wordProvider.words.sort(function (a, b) { return a.length - b.length; });
+                    wordProvider.words = wordProvider.words.filter(function (x) { return x.length >= 3; });
+                    canvas_game_1.hostCanvasGame(host, function (access) { return new word_to_picture_game_1.WordToPictureGame(access, wordProvider); });
+                    return [2 /*return*/];
+            }
+        });
+    }); })().then();
+}
+var SimpleWordProvider = (function () {
+    function SimpleWordProvider() {
+        this.words = 'cat,dog,log,hot,hat,mat,nat'.split(',');
+        this.iWord = -1;
+    }
+    SimpleWordProvider.prototype.getNextWord = function () {
+        this.iWord++;
+        if (this.iWord > this.words.length) {
+            this.iWord = 0;
+        }
+        return this.words[this.iWord];
+    };
+    SimpleWordProvider.prototype.getChoices = function (word, count) {
+        return randomize_1.randomize(this.words.filter(function (x) { return x !== word; })).slice(0, 2);
+    };
+    SimpleWordProvider.prototype.answer = function (word, answer) {
+        return word === answer;
+    };
+    return SimpleWordProvider;
+}());
+exports.SimpleWordProvider = SimpleWordProvider;
+setup();
 
 
 /***/ }),
@@ -373,17 +421,10 @@ _1.Platform.urlResolver = resolve_url_1.resolveUrlClient;
 
 "use strict";
 
-var canvas_access_1 = __webpack_require__(0);
-function hostGame(host, gameFactory) {
-    var access = new canvas_access_1.CanvasAccess(host, function (input) {
-        game && game.update(false, input).then();
-    }, function () {
-        game && game.update(true).then();
-    });
-    var game = gameFactory(access);
-    game.update(true).then();
-}
-exports.hostGame = hostGame;
+var _1 = __webpack_require__(1);
+var resolve_url_1 = __webpack_require__(13);
+_1.setupBrowser();
+_1.Platform.urlResolver = resolve_url_1.resolveUrlClient;
 
 
 /***/ }),
@@ -392,14 +433,142 @@ exports.hostGame = hostGame;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(3);
-var canvas_access_1 = __webpack_require__(0);
-var get_pictures_open_clip_art_1 = __webpack_require__(8);
-var TEMP_WORDS = ['touch', 'zebra', 'keyboard', 'car', 'cat', 'hat', 'dog'];
-var Game = (function () {
-    function Game(canvasAccess) {
+var canvas_access_1 = __webpack_require__(2);
+function hostCanvasGame(host, gameFactory) {
+    var access = new canvas_access_1.CanvasAccess(host, function (input) {
+        game && game.update(false, input).then();
+    }, function () {
+        game && game.update(true).then();
+    });
+    var game = gameFactory(access);
+    game.update(true).then();
+}
+exports.hostCanvasGame = hostCanvasGame;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var tslib_1 = __webpack_require__(0);
+var lib_1 = __webpack_require__(1);
+lib_1.setupBrowser();
+var http = lib_1.Platform.http();
+var urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads';
+var urlTemplateAlt = 'https://openclipart.org/search/json/?query={WORD}';
+function getPictures(word, count, skip, shouldUseAlt) {
+    if (count === void 0) { count = 10; }
+    if (skip === void 0) { skip = 0; }
+    if (shouldUseAlt === void 0) { shouldUseAlt = false; }
+    return tslib_1.__awaiter(this, void 0, void 0, function () {
+        var url, response, imageUrls;
+        return tslib_1.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = urlTemplate;
+                    if (shouldUseAlt) {
+                        url = urlTemplateAlt;
+                    }
+                    return [4 /*yield*/, http.request(url.replace('{WORD}', word))];
+                case 1:
+                    response = _a.sent();
+                    imageUrls = response.data.payload.map(function (x) { return x.svg.png_thumb; });
+                    if (imageUrls.length > count) {
+                        imageUrls = imageUrls.slice(skip, count);
+                    }
+                    return [2 /*return*/, imageUrls];
+            }
+        });
+    });
+}
+exports.getPictures = getPictures;
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var tslib_1 = __webpack_require__(0);
+var lib_1 = __webpack_require__(1);
+lib_1.setupBrowser();
+var http = lib_1.Platform.http();
+var apiKey = '4473112-a196654cdbdfffe7ac8adcf39';
+var urlTemplate = "https://pixabay.com/api/?key=" + apiKey + "&q={WORD}&image_type=all&safesearch=true";
+var attribution = "\n<a href=\"https://pixabay.com/\">\n\u00A0\u00A0\u00A0\u00A0<img src=\"https://pixabay.com/static/img/public/medium_rectangle_a.png\" alt=\"Pixabay\">\n</a>\n";
+function getPictures(word, count, skip) {
+    if (count === void 0) { count = 10; }
+    if (skip === void 0) { skip = 0; }
+    return tslib_1.__awaiter(this, void 0, void 0, function () {
+        var url, response, imageUrls;
+        return tslib_1.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = urlTemplate;
+                    return [4 /*yield*/, http.request(url.replace('{WORD}', word))];
+                case 1:
+                    response = _a.sent();
+                    imageUrls = response.data.hits.map(function (x) { return x.webformatURL; });
+                    if (imageUrls.length > count) {
+                        imageUrls = imageUrls.slice(skip, count);
+                    }
+                    return [2 /*return*/, imageUrls];
+            }
+        });
+    });
+}
+exports.getPictures = getPictures;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var tslib_1 = __webpack_require__(0);
+var OCA = __webpack_require__(8);
+var PB = __webpack_require__(9);
+function getPictures(word, count, attempt) {
+    if (count === void 0) { count = 10; }
+    if (attempt === void 0) { attempt = 0; }
+    return tslib_1.__awaiter(this, void 0, void 0, function () {
+        return tslib_1.__generator(this, function (_a) {
+            // if (attempt === 0) {
+            // Get Official Pictures
+            // } else 
+            if (attempt <= 0) {
+                return [2 /*return*/, OCA.getPictures(word, count, count * (attempt - 0))];
+            }
+            else {
+                return [2 /*return*/, PB.getPictures(word, count, count * (attempt - 2))];
+            }
+            return [2 /*return*/];
+        });
+    });
+}
+exports.getPictures = getPictures;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var tslib_1 = __webpack_require__(0);
+var canvas_access_1 = __webpack_require__(2);
+var get_pictures_1 = __webpack_require__(10);
+var randomize_1 = __webpack_require__(3);
+var WordToPictureGame = (function () {
+    function WordToPictureGame(canvasAccess, words) {
         var _this = this;
         this.canvasAccess = canvasAccess;
+        this.words = words;
+        this.attempt = 0;
         this.buttons = [];
         var _loop_1 = function (column) {
             var _loop_2 = function (row) {
@@ -420,13 +589,21 @@ var Game = (function () {
         for (var column = 0; column < 3; column++) {
             _loop_1(column);
         }
+        // Reload Button
+        this.buttons.push({
+            u: 0.5,
+            v: 0,
+            callback: function () {
+                _this.attempt++;
+                _this.loadWord();
+            }
+        });
     }
-    Game.prototype.update = function (forceRedraw, input) {
+    WordToPictureGame.prototype.update = function (forceRedraw, input) {
         return tslib_1.__awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var _a, i, url, image;
-            return tslib_1.__generator(this, function (_b) {
-                switch (_b.label) {
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         this.handleInput(input);
                         // Get Next Word
@@ -438,38 +615,13 @@ var Game = (function () {
                             }
                             return [2 /*return*/];
                         }
-                        if (!this.words) {
-                            // TODO: Get Word List
-                            this.words = TEMP_WORDS;
-                            this.iWord = -1;
-                        }
                         if (!!this.word) return [3 /*break*/, 2];
-                        this.iWord++;
-                        if (this.iWord >= this.words.length) {
-                            this.iWord = 0;
-                        }
-                        this.word = this.words[this.iWord];
-                        // Get word images
-                        _a = this;
-                        return [4 /*yield*/, get_pictures_open_clip_art_1.getPictures(this.word)];
+                        this.word = this.words.getNextWord();
+                        this.attempt = 0;
+                        return [4 /*yield*/, this.loadWord()];
                     case 1:
-                        // Get word images
-                        _a.wordImageUrls = _b.sent();
-                        this.wordImages = [];
-                        if (this.wordImageUrls.length > 9) {
-                            this.wordImageUrls = this.wordImageUrls.slice(0, 9);
-                        }
-                        for (i = 0; i < this.wordImageUrls.length; i++) {
-                            url = this.wordImageUrls[i];
-                            image = this.wordImages[i] = new Image();
-                            image.src = url;
-                            image.onload = function () {
-                                requestAnimationFrame(function () {
-                                    _this.draw(false);
-                                });
-                            };
-                        }
-                        _b.label = 2;
+                        _a.sent();
+                        _a.label = 2;
                     case 2:
                         requestAnimationFrame(function () {
                             _this.draw(forceRedraw);
@@ -479,7 +631,99 @@ var Game = (function () {
             });
         });
     };
-    Game.prototype.handleInput = function (input) {
+    WordToPictureGame.prototype.loadWord = function () {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            var wordImageUrls, _loop_3, this_2, _i, _a, choice, _b, _c, c, image;
+            return tslib_1.__generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        // Draw blank
+                        this.choices = null;
+                        requestAnimationFrame(function () {
+                            _this.draw(false);
+                        });
+                        wordImageUrls = [];
+                        if (!(this.attempt <= 0)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, get_pictures_1.getPictures(this.word, 3, this.attempt)];
+                    case 1:
+                        wordImageUrls = _d.sent();
+                        return [3 /*break*/, 5];
+                    case 2:
+                        if (!(this.attempt <= 4)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, get_pictures_1.getPictures(this.word, 9, this.attempt - 1)];
+                    case 3:
+                        wordImageUrls = _d.sent();
+                        return [3 /*break*/, 5];
+                    case 4:
+                        // Fail
+                        this.word = null;
+                        setTimeout(function () {
+                            _this.update(false);
+                        });
+                        return [2 /*return*/];
+                    case 5:
+                        this.choices = wordImageUrls.map(function (x) { return ({
+                            word: _this.word,
+                            imageUrl: x,
+                            image: null
+                        }); });
+                        if (this.choices.length <= 0) {
+                            this.word = null;
+                            setTimeout(function () {
+                                _this.update(false);
+                            });
+                            return [2 /*return*/];
+                        }
+                        if (!(this.attempt < 1)) return [3 /*break*/, 9];
+                        _loop_3 = function (choice) {
+                            var wrongWordImageUrls, _a;
+                            return tslib_1.__generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0: return [4 /*yield*/, get_pictures_1.getPictures(choice, 3)];
+                                    case 1:
+                                        wrongWordImageUrls = _b.sent();
+                                        (_a = this_2.choices).push.apply(_a, wrongWordImageUrls.map(function (x) { return ({
+                                            word: choice,
+                                            imageUrl: x,
+                                            image: null
+                                        }); }));
+                                        return [2 /*return*/];
+                                }
+                            });
+                        };
+                        this_2 = this;
+                        _i = 0, _a = this.words.getChoices(this.word, 2);
+                        _d.label = 6;
+                    case 6:
+                        if (!(_i < _a.length)) return [3 /*break*/, 9];
+                        choice = _a[_i];
+                        return [5 /*yield**/, _loop_3(choice)];
+                    case 7:
+                        _d.sent();
+                        _d.label = 8;
+                    case 8:
+                        _i++;
+                        return [3 /*break*/, 6];
+                    case 9:
+                        // Randomize
+                        this.choices = randomize_1.randomize(this.choices);
+                        for (_b = 0, _c = this.choices; _b < _c.length; _b++) {
+                            c = _c[_b];
+                            image = c.image = new Image();
+                            image.src = c.imageUrl;
+                            image.onload = function () {
+                                requestAnimationFrame(function () {
+                                    _this.draw(false);
+                                });
+                            };
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    WordToPictureGame.prototype.handleInput = function (input) {
         if (!input) {
             return;
         }
@@ -501,19 +745,30 @@ var Game = (function () {
             this.targetButton = null;
         }
     };
-    Game.prototype.selectImage = function (column, row) {
+    WordToPictureGame.prototype.selectImage = function (column, row) {
         var _this = this;
         var i = column * 3 + row;
-        console.log(i, this.wordImages[i], this.wordImageUrls[i]);
+        console.log(i, this.choices[i]);
+        var choice = this.choices[i];
+        if (choice.isDisabled) {
+            return;
+        }
+        var isRight = this.words.answer(this.word, choice.word);
         // TODO: Record Image Selection
+        if (!isRight) {
+            choice.isDisabled = true;
+            // TODO: Only redraw mistake
+            requestAnimationFrame(function () {
+                _this.draw(true);
+            });
+            return;
+        }
         this.word = null;
-        this.wordImages = null;
-        this.wordImageUrls = null;
-        requestAnimationFrame(function () {
-            _this.draw(false);
+        setTimeout(function () {
+            _this.update(false);
         });
     };
-    Game.prototype.draw = function (forceRedraw) {
+    WordToPictureGame.prototype.draw = function (forceRedraw) {
         var cvx = this.canvasAccess.canvas;
         var ctx = this.canvasAccess.context;
         var w = this.canvasAccess.width;
@@ -527,24 +782,26 @@ var Game = (function () {
             ctx.font = '24px sans-serif';
             ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
         }
-        if (this.wordImages) {
-            for (var i = 0; i < this.wordImages.length; i++) {
-                var wordImage = this.wordImages[i];
+        if (this.choices) {
+            for (var i = 0; i < this.choices.length; i++) {
+                var choice = this.choices[i];
+                var wordImage = choice.image;
                 if (!wordImage.width) {
                     continue;
                 }
-                this.drawImage(wordImage, Math.floor(i / 3), i % 3);
+                this.drawImage(wordImage, Math.floor(i / 3), i % 3, choice.isDisabled ? '#FF0000' : '#00FF00');
             }
         }
     };
-    Game.prototype.getButtonUV = function (column, row) {
+    WordToPictureGame.prototype.getButtonUV = function (column, row) {
         var u = 0.05 + column * 0.3;
         var v = 0.15 + row * 0.25;
         var uw = 0.3 - 0.025;
         var vh = 0.25 - 0.025;
         return { u: u, v: v, uw: uw, vh: vh };
     };
-    Game.prototype.drawImage = function (image, column, row) {
+    WordToPictureGame.prototype.drawImage = function (image, column, row, outlineColor) {
+        if (outlineColor === void 0) { outlineColor = '#00FF00'; }
         var _a = this.getButtonUV(column, row), u = _a.u, v = _a.v, uw = _a.uw, vh = _a.vh;
         var w = this.canvasAccess.width;
         var h = this.canvasAccess.height;
@@ -566,45 +823,59 @@ var Game = (function () {
         ws = wsNew;
         hs = hsNew;
         ctx.drawImage(image, 0, 0, wi, hi, xs, ys, ws, hs);
-        ctx.strokeStyle = '#CCCCCC';
+        ctx.strokeStyle = outlineColor;
         ctx.strokeRect(w * u, h * v, w * uw, h * vh);
         // console.log(column, row, u, v);
     };
-    return Game;
+    return WordToPictureGame;
 }());
-exports.Game = Game;
+exports.WordToPictureGame = WordToPictureGame;
 
 
 /***/ }),
-/* 8 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var tslib_1 = __webpack_require__(3);
-var lib_1 = __webpack_require__(1);
-lib_1.setupBrowser();
-var http = lib_1.Platform.http();
-var urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads';
-function getPictures(word) {
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var response, imageUrls;
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, http.request(urlTemplate.replace('{WORD}', word))];
-                case 1:
-                    response = _a.sent();
-                    imageUrls = response.data.payload.map(function (x) { return x.svg.png_thumb; });
-                    return [2 /*return*/, imageUrls];
-            }
-        });
+function loadUnixode(document) {
+    var parts = document.split('### WORDS:');
+    var mappings = parts[0].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
+        var partsA = x.split(':');
+        var partsB = partsA[1].split('=');
+        var unixode = partsA[0];
+        var english = partsB[0];
+        var xharish = partsB[1];
+        return {
+            unixode: unixode,
+            english: english,
+            xharish: xharish,
+        };
     });
+    var lookup = {};
+    mappings.forEach(function (x2) { return lookup[x2.unixode] = x2; });
+    var words = parts[1].split('\n').filter(function (x) { return x.trim().length > 0; }).map(function (x) {
+        var lookups = x.split('').filter(function (x2) { return x2.trim().length > 0; }).map(function (x2) { return lookup[x2]; });
+        return {
+            unixode: x,
+            pairs: x.split('').map(function (x2) { return ({
+                english: lookup[x2] ? lookup[x2].english : '',
+                xharish: lookup[x2] ? lookup[x2].xharish : ''
+            }); }).filter(function (x2) { return x2.english !== '' || x2.xharish !== ''; }),
+            english: lookups.map(function (x2) { return x2.english; }).join(''),
+            xharish: lookups.map(function (x2) { return x2.xharish; }).join(''),
+        };
+    });
+    return {
+        mappings: mappings,
+        words: words
+    };
 }
-exports.getPictures = getPictures;
+exports.loadUnixode = loadUnixode;
 
 
 /***/ }),
-/* 9 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -657,7 +928,7 @@ exports.getPathDepthPrefix = getPathDepthPrefix;
 
 
 /***/ }),
-/* 10 */
+/* 14 */
 /***/ (function(module, exports) {
 
 var g;
@@ -684,7 +955,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 11 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -855,7 +1126,7 @@ exports.Ajax = Ajax;
 
 
 /***/ }),
-/* 12 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -895,11 +1166,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var P = __webpack_require__(2);
-var browser_ajax_1 = __webpack_require__(11);
+var P = __webpack_require__(4);
+var browser_ajax_1 = __webpack_require__(15);
 function setupBrowser() {
     P.Platform.provider = new BrowserPlatformProvider();
-    Promise = __webpack_require__(14).Promise;
+    Promise = __webpack_require__(18).Promise;
 }
 exports.setupBrowser = setupBrowser;
 var BrowserPlatformProvider = (function () {
@@ -960,7 +1231,7 @@ var BrowserHttpClient = (function () {
 
 
 /***/ }),
-/* 13 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -968,12 +1239,12 @@ var BrowserHttpClient = (function () {
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-__export(__webpack_require__(2));
-__export(__webpack_require__(12));
+__export(__webpack_require__(4));
+__export(__webpack_require__(16));
 
 
 /***/ }),
-/* 14 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process, global) {var require;/*!
@@ -1112,7 +1383,7 @@ function flush() {
 function attemptVertx() {
   try {
     var r = require;
-    var vertx = __webpack_require__(16);
+    var vertx = __webpack_require__(20);
     vertxNext = vertx.runOnLoop || vertx.runOnContext;
     return useVertxTimer();
   } catch (e) {
@@ -2133,10 +2404,10 @@ return Promise;
 
 })));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15), __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(19), __webpack_require__(14)))
 
 /***/ }),
-/* 15 */
+/* 19 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -2322,17 +2593,17 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 16 */
+/* 20 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 17 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
+__webpack_require__(6);
 __webpack_require__(5);
-__webpack_require__(4);
 
 
 /***/ })
