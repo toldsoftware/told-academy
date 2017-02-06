@@ -569,6 +569,7 @@ var WordToPictureGame = (function () {
         this.canvasAccess = canvasAccess;
         this.words = words;
         this.attempt = 0;
+        this.isReadyButtonVisible = false;
         this.buttons = [];
         var _loop_1 = function (column) {
             var _loop_2 = function (row) {
@@ -577,6 +578,10 @@ var WordToPictureGame = (function () {
                     u: u + uw * 0.5,
                     v: v + vh * 0.5,
                     callback: function () {
+                        if (_this.isReadyButtonVisible) {
+                            _this.loadWord();
+                            return;
+                        }
                         _this.selectImage(column, row);
                     }
                 });
@@ -594,10 +599,24 @@ var WordToPictureGame = (function () {
             u: 0.5,
             v: 0,
             callback: function () {
+                if (_this.isReadyButtonVisible) {
+                    _this.loadWord();
+                    return;
+                }
                 _this.attempt++;
                 _this.loadWord();
             }
         });
+        // // Ready Button
+        // this.buttons.push({
+        //     u: 0.5,
+        //     v: 0.5,
+        //     callback: () => {
+        //         if (this.isReadyButtonVisible) {
+        //             this.loadWord();
+        //         }
+        //     }
+        // });
     }
     WordToPictureGame.prototype.update = function (forceRedraw, input) {
         return tslib_1.__awaiter(this, void 0, void 0, function () {
@@ -618,7 +637,7 @@ var WordToPictureGame = (function () {
                         if (!!this.word) return [3 /*break*/, 2];
                         this.word = this.words.getNextWord();
                         this.attempt = 0;
-                        return [4 /*yield*/, this.loadWord()];
+                        return [4 /*yield*/, this.startWord()];
                     case 1:
                         _a.sent();
                         _a.label = 2;
@@ -631,6 +650,20 @@ var WordToPictureGame = (function () {
             });
         });
     };
+    WordToPictureGame.prototype.startWord = function () {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return tslib_1.__generator(this, function (_a) {
+                // Draw the word alone
+                this.choices = null;
+                this.isReadyButtonVisible = true;
+                requestAnimationFrame(function () {
+                    _this.draw(false);
+                });
+                return [2 /*return*/];
+            });
+        });
+    };
     WordToPictureGame.prototype.loadWord = function () {
         return tslib_1.__awaiter(this, void 0, void 0, function () {
             var _this = this;
@@ -640,6 +673,7 @@ var WordToPictureGame = (function () {
                     case 0:
                         // Draw blank
                         this.choices = null;
+                        this.isReadyButtonVisible = false;
                         requestAnimationFrame(function () {
                             _this.draw(false);
                         });
@@ -777,10 +811,17 @@ var WordToPictureGame = (function () {
         ctx.clearRect(0, 0, w, h);
         //      }
         if (this.word) {
-            var rect = ctx.measureText(this.word);
             ctx.fillStyle = '#FFFF00';
-            ctx.font = '24px sans-serif';
-            ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
+            if (!this.isReadyButtonVisible) {
+                ctx.font = '24px sans-serif';
+                var rect = ctx.measureText(this.word);
+                ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.1);
+            }
+            else {
+                ctx.font = '48px sans-serif';
+                var rect = ctx.measureText(this.word);
+                ctx.fillText(this.word, w * 0.5 - rect.width * 0.5, h * 0.4);
+            }
         }
         if (this.choices) {
             for (var i = 0; i < this.choices.length; i++) {
