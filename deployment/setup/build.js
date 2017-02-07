@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 265);
+/******/ 	return __webpack_require__(__webpack_require__.s = 264);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -18495,7 +18495,54 @@ nacl.setPRNG = function(fn) {
 module.exports = require("net");
 
 /***/ }),
-/* 73 */,
+/* 73 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var tslib_1 = __webpack_require__(29);
+var path = __webpack_require__(18);
+var root_dir_1 = __webpack_require__(52);
+function setDirName(dirName) {
+    root_dir_1.dir.rootDir = path.resolve(dirName, '..');
+    return this;
+}
+exports.setDirName = setDirName;
+function serve(main) {
+    return function (context, request) {
+        var req = tslib_1.__assign({}, request);
+        req.pathName = req.pathName || context.bindingData.pathName || '';
+        req.pathParts = req.pathName.split('/').filter(function (x) { return x.length > 0; });
+        if (req.query.ping != null) {
+            context.done(null, {
+                status: 200,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'PONG',
+            });
+            return;
+        }
+        // Auto-Parse Json
+        if (typeof req.body === 'string') {
+            var orig = req.body;
+            try {
+                req.body = JSON.parse(req.body);
+            }
+            catch (err) {
+                req.body = orig;
+            }
+        }
+        main(context, req)
+            .then(function () { })
+            .catch(function (err) {
+            context.log('Uncaught Error:', err);
+            context.done(err, null);
+        });
+    };
+}
+exports.serve = serve;
+
+
+/***/ }),
 /* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -27166,94 +27213,7 @@ module.exports = require("punycode");
 module.exports = require("tls");
 
 /***/ }),
-/* 117 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(29);
-var fs = __webpack_require__(17);
-var Path = __webpack_require__(18);
-var resolve_url_1 = __webpack_require__(137);
-var root_dir_1 = __webpack_require__(52);
-function main(context, request, pathDepthFromApiRoot) {
-    if (pathDepthFromApiRoot === void 0) { pathDepthFromApiRoot = 1; }
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var pathOrig, filePath, path;
-        return tslib_1.__generator(this, function (_a) {
-            pathOrig = request.query.name || request.pathName;
-            filePath = pathOrig
-                .replace(/\/$/, '')
-                .replace(/\/(file)$/, '')
-                .replace(/\/([^\/]+\.js\.map)$/, '.map');
-            path = Path.resolve(root_dir_1.dir.rootDir, resolve_url_1.getPathDepthPrefix(pathDepthFromApiRoot - 1), 'resources', filePath.replace(/^\//, ''));
-            context.log('filePath=' + filePath + ' path=' + path + ' __dirname=' + __dirname + ' request.query.name=' + request.query.name + ' request.pathName=' + request.pathName);
-            fs.readFile(path, function (err, data) {
-                context.log('path=' + path);
-                if (err != null) {
-                    context.log('ERROR: ' + err);
-                    context.done(null, {
-                        status: 404,
-                        headers: {
-                            'Content-Type': 'text/plain',
-                        },
-                        body: ('File Not Found: ' + filePath)
-                    });
-                    return;
-                }
-                var type = 'text/plain';
-                if (path.match('\.html$')) {
-                    type = 'text/html';
-                }
-                if (path.match('\.css$')) {
-                    type = 'text/css';
-                }
-                if (path.match('\.js$')) {
-                    type = 'application/x-javascript';
-                }
-                if (path.match('\.json$')) {
-                    type = 'application/json';
-                }
-                if (path.match('\.jpg$')) {
-                    type = 'image/jpeg';
-                }
-                if (path.match('\.png$')) {
-                    type = 'image/png';
-                }
-                if (path.match('\.gif$')) {
-                    type = 'image/gif';
-                }
-                if (path.match('\.ico$')) {
-                    type = 'image/x-icon';
-                }
-                // Auto Resolve Resource Urls?
-                var body = data;
-                if (type === 'text/html') {
-                    body = data.toString();
-                    body = resolve_url_1.resolveAllUrls(body, pathDepthFromApiRoot);
-                }
-                // // Prevent Json Curroption
-                // if (type === 'application/json') {
-                //     body = data.toString();
-                //     body = JSON.parse(body);
-                // }
-                context.done(null, {
-                    headers: {
-                        'Content-Type': type,
-                    },
-                    body: body,
-                    // Bypass response handling
-                    isRaw: true
-                });
-            });
-            return [2 /*return*/];
-        });
-    });
-}
-exports.main = main;
-
-
-/***/ }),
+/* 117 */,
 /* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -36948,59 +36908,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 137 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function resolveUrlClient(url) {
-    if (url.indexOf('./') !== 0) {
-        return url;
-    }
-    var pathname = window.location.pathname;
-    var prefix = '/';
-    if (pathname.match(/^\/api\//)) {
-        prefix = '/api/';
-    }
-    return resolveUrl_inner(url, prefix);
-}
-exports.resolveUrlClient = resolveUrlClient;
-function resolveUrl(url, pathDepthFromApiRoot) {
-    if (pathDepthFromApiRoot === void 0) { pathDepthFromApiRoot = 1; }
-    if (url.indexOf('./') !== 0) {
-        return url;
-    }
-    var depthPrefix = getPathDepthPrefix(pathDepthFromApiRoot);
-    return resolveUrl_inner(url, depthPrefix);
-}
-exports.resolveUrl = resolveUrl;
-function resolveUrl_inner(url, prefix) {
-    url = url.substr(2);
-    // If file extension, make file
-    if (url.match(/[^/]\.[^/]+$/)) {
-        return prefix + "resource/" + url + "/file";
-    }
-    else {
-        return "" + prefix + url + "?q";
-    }
-}
-function resolveAllUrls(content, pathDepthFromApiRoot) {
-    return content
-        .replace(/"(\.\/[^"]+)"/g, function (x) { return '"' + resolveUrl(x.substr(1, x.length - 2), pathDepthFromApiRoot) + '"'; })
-        .replace(/'(\.\/[^']+)'/g, function (x) { return '\'' + resolveUrl(x.substr(1, x.length - 2), pathDepthFromApiRoot) + '\''; });
-}
-exports.resolveAllUrls = resolveAllUrls;
-function getPathDepthPrefix(pathDepthFromApiRoot) {
-    var depthPrefix = '';
-    for (var i = 0; i < pathDepthFromApiRoot; i++) {
-        depthPrefix += '../';
-    }
-    return depthPrefix;
-}
-exports.getPathDepthPrefix = getPathDepthPrefix;
-
-
-/***/ }),
+/* 137 */,
 /* 138 */
 /***/ (function(module, exports) {
 
@@ -78639,51 +78547,8 @@ module.exports = require("string_decoder");
 module.exports = require("zlib");
 
 /***/ }),
-/* 254 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(29);
-var resource_1 = __webpack_require__(117);
-function main(context, request) {
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    // request.query.name = 'index.html';
-                    request.query.name = 'word-to-picture.html';
-                    return [4 /*yield*/, resource_1.main(context, request, 0)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-exports.main = main;
-
-
-/***/ }),
-/* 255 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(29);
-var resource_1 = __webpack_require__(117);
-function main(context, request) {
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, resource_1.main(context, request)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-exports.main = main;
-
-
-/***/ }),
+/* 254 */,
+/* 255 */,
 /* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -78751,330 +78616,20 @@ exports.main = main;
 
 
 /***/ }),
-/* 257 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(29);
-var node_utils_1 = __webpack_require__(259);
-var blob_utils_1 = __webpack_require__(258);
-var settings_1 = __webpack_require__(118);
-function main(context, request) {
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var word, imageUrl, containerName, blobBaseName, service, appendBlobName, result, imageBlobName, props, response;
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    context.log('START', 'request.query', request.query);
-                    word = request.query.word;
-                    imageUrl = request.query.imageUrl;
-                    containerName = settings_1.Settings.containerName_wordPictures;
-                    blobBaseName = request.query.word;
-                    service = blob_utils_1.createBlobService();
-                    appendBlobName = blobBaseName + '/usage.append.txt';
-                    return [4 /*yield*/, service.appendText(containerName, appendBlobName, imageUrl)];
-                case 1:
-                    result = _a.sent();
-                    context.log('Saved Usage', 'appendBlobName', appendBlobName, 'committedBlockCount', result.committedBlockCount);
-                    imageBlobName = blobBaseName + '/image/' + imageUrl;
-                    return [4 /*yield*/, service.getBlobProperties(containerName, imageBlobName)];
-                case 2:
-                    props = _a.sent();
-                    if (!!props.exists) return [3 /*break*/, 5];
-                    context.log('Copy Image START', 'imageBlobName', imageBlobName);
-                    return [4 /*yield*/, node_utils_1.httpRequest_stream(imageUrl, 'GET')];
-                case 3:
-                    response = _a.sent();
-                    context.log('Downloaded Image', 'response.length', response.length);
-                    return [4 /*yield*/, service.createBlockBlobFromStream(containerName, imageBlobName, response.stream, response.length)];
-                case 4:
-                    _a.sent();
-                    context.log('Copy Image END', 'imageBlobName', imageBlobName);
-                    _a.label = 5;
-                case 5:
-                    context.done(null, {
-                        headers: {
-                            'Access-Control-Allow-Origin': '*',
-                            'Content-Type': 'application/json',
-                        },
-                        body: {
-                            ok: true,
-                        }
-                    });
-                    context.log('END');
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-exports.main = main;
-
-
-/***/ }),
-/* 258 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(29);
-var azure_storage_1 = __webpack_require__(119);
-var promisify_1 = __webpack_require__(260);
-function createBlobService() {
-    var service = azure_storage_1.createBlobService();
-    var promisified = promisifyBlobService(service);
-    var extended = tslib_1.__assign({}, promisified, { appendText: function (container, blob, content) {
-            return appendText(promisified, container, blob, content);
-        } });
-    return extended;
-}
-exports.createBlobService = createBlobService;
-function promisifyBlobService(service) {
-    return {
-        createBlockBlobFromText: promisify_1.promisify(service.createBlockBlobFromText, service),
-        createBlockBlobFromStream: promisify_1.promisify(service.createBlockBlobFromStream, service),
-        getBlobToText: promisify_1.promisify(service.getBlobToText, service),
-        appendBlockFromText: promisify_1.promisify(service.appendBlockFromText, service),
-        createAppendBlobFromText: promisify_1.promisify(service.createAppendBlobFromText, service),
-        getBlobProperties: promisify_1.promisify(service.getBlobProperties, service),
-    };
-}
-var example = promisifyBlobService(null);
-function appendText(service, container, blob, content, shouldIncrementIfFull) {
-    if (shouldIncrementIfFull === void 0) { shouldIncrementIfFull = true; }
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var err_1, blobProps;
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 6]);
-                    return [4 /*yield*/, service.appendBlockFromText(container, blob, content)];
-                case 1: return [2 /*return*/, _a.sent()];
-                case 2:
-                    err_1 = _a.sent();
-                    return [4 /*yield*/, service.getBlobProperties(container, blob)];
-                case 3:
-                    blobProps = _a.sent();
-                    if (!!blobProps.exists) return [3 /*break*/, 5];
-                    return [4 /*yield*/, service.createAppendBlobFromText(container, blob, content)];
-                case 4: return [2 /*return*/, _a.sent()];
-                case 5: return [3 /*break*/, 6];
-                case 6: throw 'Failed to appendText to blob: ' + container + '/' + blob;
-            }
-        });
-    });
-}
-
-
-/***/ }),
-/* 259 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var http = __webpack_require__(24);
-var https = __webpack_require__(31);
-var url = __webpack_require__(7);
-function httpRequest(requestUrl, method) {
-    if (method === void 0) { method = 'GET'; }
-    return httpRequest_inner(requestUrl, method, true);
-}
-exports.httpRequest = httpRequest;
-function httpRequest_raw(requestUrl, method) {
-    if (method === void 0) { method = 'GET'; }
-    return httpRequest_inner(requestUrl, method, false);
-}
-exports.httpRequest_raw = httpRequest_raw;
-function httpRequest_inner(requestUrl, method, shouldParseJson) {
-    return new Promise(function (resolve, reject) {
-        var urlObj = url.parse(requestUrl);
-        var requestOptions = urlObj;
-        requestOptions.method = method;
-        var httpClient = (urlObj.protocol.match(/https/) ? https : http);
-        httpClient.request(requestOptions, function (res) {
-            var body = '';
-            res.on('data', function (d) {
-                body += d;
-            });
-            res.on('end', function () {
-                var statusCode = res.statusCode;
-                var isSuccess = res.statusCode >= 200 && res.statusCode < 300;
-                var statusMessage = res.statusMessage;
-                var hasFailedToParseJson = false;
-                var bodyObj = null;
-                if (shouldParseJson) {
-                    try {
-                        bodyObj = JSON.parse(body);
-                    }
-                    catch (err) {
-                        bodyObj = body;
-                        isSuccess = false;
-                        hasFailedToParseJson = true;
-                    }
-                }
-                else {
-                    bodyObj = body;
-                }
-                var responseObj = {
-                    requestUrl: requestUrl,
-                    body: bodyObj,
-                    isSuccess: isSuccess,
-                    hasFailedToParseJson: hasFailedToParseJson,
-                    statusCode: statusCode,
-                    statusMessage: statusMessage,
-                    responseRawHeaders: res.rawHeaders
-                };
-                resolve(responseObj);
-            });
-        }).end();
-    });
-}
-function httpRequest_stream(requestUrl, method) {
-    return new Promise(function (resolve, reject) {
-        var urlObj = url.parse(requestUrl);
-        var requestOptions = urlObj;
-        requestOptions.method = method;
-        var httpClient = (urlObj.protocol.match(/https/) ? https : http);
-        httpClient.request(requestOptions, function (res) {
-            resolve({ stream: res, length: res.headers['content-length'] });
-        }).end();
-    });
-}
-exports.httpRequest_stream = httpRequest_stream;
-
-
-/***/ }),
-/* 260 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function promisify(f, thisContext) {
-    if (thisContext === void 0) { thisContext = null; }
-    return function () {
-        var args = Array.prototype.slice.call(arguments);
-        return new Promise(function (resolve, reject) {
-            args.push(function (err, result) { return err !== null ? reject(err) : resolve(result); });
-            f.apply(thisContext, args);
-        });
-    };
-}
-exports.promisify = promisify;
-
-
-/***/ }),
-/* 261 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var http = __webpack_require__(24);
-var url = __webpack_require__(7);
-var querystring = __webpack_require__(19);
-var path = __webpack_require__(18);
-var resource_1 = __webpack_require__(117);
-var root_dir_1 = __webpack_require__(52);
-function setDirName(dirName) {
-    root_dir_1.dir.rootDir = path.resolve(dirName, '..');
-    return this;
-}
-exports.setDirName = setDirName;
-function serve(functions, port) {
-    if (port === void 0) { port = 8765; }
-    console.log('Server Started at http://localhost:' + port);
-    http.createServer(function (req, res) {
-        console.log('rootDir=', root_dir_1.dir.rootDir, '__dirname=', __dirname);
-        var uri = url.parse(req.url);
-        var query = querystring.parse(uri.query);
-        var content = '';
-        req.on('data', function (chunk) { return content += chunk; });
-        req.on('end', function () {
-            var body = content;
-            // Auto-Parse Json
-            if (typeof body === 'string') {
-                var orig = body;
-                try {
-                    body = JSON.parse(body);
-                }
-                catch (err) {
-                    body = orig;
-                }
-            }
-            console.log('START Request:', 'query', query, 'body', body);
-            var context = {
-                log: function (m) {
-                    var x = [];
-                    for (var _i = 1; _i < arguments.length; _i++) {
-                        x[_i - 1] = arguments[_i];
-                    }
-                    return console.log.apply(console, [m].concat(x));
-                },
-                done: function (err, r) {
-                    if (err) {
-                        console.error(err);
-                        res.writeHead(500, { 'Content-Type': 'text/plain' });
-                        res.end('ERROR: ' + err);
-                        return;
-                    }
-                    if (typeof r.body === 'object' && !(r.body instanceof Buffer)) {
-                        r.body = JSON.stringify(r.body);
-                    }
-                    res.writeHead(r.status || 200, r.headers || { 'Content-Type': 'text/plain' });
-                    res.end(r.body);
-                    console.log('END Request:', r.body);
-                }
-            };
-            // Process Request
-            var request = { query: query, body: body, pathName: uri.pathname || '', pathParts: uri.pathname.split('/').filter(function (p) { return p.length > 0; }), headers: {} };
-            if (request.pathParts.length === 0) {
-                request.query.name = 'test-main.html';
-                resource_1.main(context, request).then();
-            }
-            else if (request.pathParts[0] === 'resources') {
-                request.pathName = request.pathName
-                    .replace('/resources/', '/')
-                    .replace('resources/', '');
-                request.pathParts.splice(0, 1);
-                resource_1.main(context, request).then();
-            }
-            else if (functions.filter(function (x) { return x.name === request.pathParts[0]; }).length > 0) {
-                var f = functions.filter(function (x) { return x.name === request.pathParts[0]; })[0];
-                request.pathName = request.pathName.replace("/" + f.name + "/", '/').replace(f.name + "/", '').replace("" + f.name, '');
-                request.pathParts.splice(0, 1);
-                try {
-                    f.main(context, request)
-                        .then(function () { })
-                        .catch(function (err) { return console.error(err); });
-                }
-                catch (err) {
-                    console.error(err);
-                }
-            }
-            else {
-                context.done('Unknown Request', null);
-            }
-        });
-    }).listen(port);
-}
-exports.serve = serve;
-
-
-/***/ }),
+/* 257 */,
+/* 258 */,
+/* 259 */,
+/* 260 */,
+/* 261 */,
 /* 262 */,
 /* 263 */,
-/* 264 */,
-/* 265 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var functions = [
-    {name: 'default', main: __webpack_require__(254).main },
-	{name: 'resource', main: __webpack_require__(255).main },
-	{name: 'setup', main: __webpack_require__(256).main },
-	{name: 'word-to-picture-record-answer', main: __webpack_require__(257).main }
-];
-
-module.exports = __webpack_require__(261).setDirName(__dirname).serve(functions);
+// Intentionally global
+___export = __webpack_require__(73).setDirName(__dirname).serve(__webpack_require__(256).main);
+module.exports = ___export;
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=test-main.js.map
+//# sourceMappingURL=build.js.map

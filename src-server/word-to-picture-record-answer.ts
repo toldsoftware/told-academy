@@ -3,6 +3,7 @@ import { httpRequest_stream } from './shared/node-utils';
 import * as T from '@told/azure-functions-server/lib/src';
 
 import { createBlobService } from './shared/blob-utils';
+import { Settings } from './shared/settings';
 
 
 export interface Request extends T.Request<{ word: string, imageUrl: string }, {}> { }
@@ -21,7 +22,7 @@ export async function main(context: T.Context<ResponseData>, request: Request) {
     let word = request.query.word;
     let imageUrl = request.query.imageUrl;
 
-    let containerName = 'word-pictures';
+    let containerName = Settings.containerName_wordPictures;
     let blobBaseName = request.query.word;
 
     // Uses env.AZURE_STORAGE_CONNECTION_STRING

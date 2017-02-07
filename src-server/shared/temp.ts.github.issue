@@ -5,4 +5,33 @@ export function createSomethingComplex() {
     };
 }
 
-type ComplexThing = typeof ( createSomethingComplex());
+// Option 1: Use additional return keyword
+type ComplexThing = typeof return createSomethingComplex;
+
+// Option 2: Use empty parameters
+type ComplexThing = typeof createSomethingComplex();
+
+// Workaround:
+// It is possible to get the return type, only by actually calling the method and then using that object to define the type
+let somethingComplex = createSomethingComplex();
+type ComplexThing = typeof somethingComplex;
+
+
+export function mainProcess() {
+    let a = subProcessA();
+    let b = subProcessB(a);
+    let c = subProcessB(c);
+    return c;
+}
+
+export function subProcessA() {
+    return { a: true };
+}
+
+export function subProcessB(a: typeof return subProcessA){
+    return { b: true };
+}
+
+export function subProcessC(a: typeof return subProcessB){
+    return { c: true };
+}
