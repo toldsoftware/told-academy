@@ -78830,6 +78830,9 @@ function createBlobService() {
 }
 exports.createBlobService = createBlobService;
 function promisifyBlobService(service) {
+    if (service == null) {
+        return null;
+    }
     return {
         createBlockBlobFromText: promisify_1.promisify(service.createBlockBlobFromText, service),
         createBlockBlobFromStream: promisify_1.promisify(service.createBlockBlobFromStream, service),

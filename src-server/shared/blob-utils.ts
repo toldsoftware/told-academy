@@ -18,6 +18,7 @@ export function createBlobService() {
 }
 
 function promisifyBlobService(service: BlobService) {
+    if (service == null) { return null; }
     return {
         createBlockBlobFromText: promisify(service.createBlockBlobFromText, service),
         createBlockBlobFromStream: promisify(service.createBlockBlobFromStream, service),
