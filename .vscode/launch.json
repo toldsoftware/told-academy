@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible Node.js debug attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [{
+        "type": "node2",
+        "request": "launch",
+        "name": "Launch Program",
+        "program": "${workspaceRoot}\\deployment\\test-main\\test-main.source.js",
+        "cwd": "${workspaceRoot}",
+        "outFiles": [],
+        "sourceMaps": true,
+        "env": {
+            "TEST": "true",
+            "apiUrl": "http://localhost:8765/",
+            "AZURE_STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;AccountName=toldacademy;AccountKey=eBLgKtQgiTQRfdIZfUWUxANS26dKGVWv5q7kobCmdR1JYl+M5WG2BUg4fFTU1xe1g775x+QSnIDbxUem7jyIGQ==;"
+        }
+    }]
+}

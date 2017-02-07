@@ -68,6 +68,18 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+__export(__webpack_require__(18));
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -175,18 +187,6 @@ function __generator(thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-__export(__webpack_require__(18));
-
 
 /***/ }),
 /* 2 */
@@ -362,8 +362,8 @@ exports.Platform = Platform;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(0);
-var lib_1 = __webpack_require__(1);
+var tslib_1 = __webpack_require__(1);
+var lib_1 = __webpack_require__(0);
 var utils_1 = __webpack_require__(3);
 var canvas_game_1 = __webpack_require__(7);
 var unixode_loader_1 = __webpack_require__(12);
@@ -428,7 +428,7 @@ setup();
 
 "use strict";
 
-var _1 = __webpack_require__(1);
+var _1 = __webpack_require__(0);
 var resolve_url_1 = __webpack_require__(14);
 _1.setupBrowser();
 _1.Platform.urlResolver = resolve_url_1.resolveUrlClient;
@@ -459,8 +459,8 @@ exports.hostCanvasGame = hostCanvasGame;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(0);
-var lib_1 = __webpack_require__(1);
+var tslib_1 = __webpack_require__(1);
+var lib_1 = __webpack_require__(0);
 lib_1.setupBrowser();
 var http = lib_1.Platform.http();
 var urlTemplate = 'https://openclipart.org/search/json/?query={WORD}&sort=downloads&amount=100';
@@ -503,8 +503,8 @@ exports.getPictures = getPictures;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(0);
-var lib_1 = __webpack_require__(1);
+var tslib_1 = __webpack_require__(1);
+var lib_1 = __webpack_require__(0);
 lib_1.setupBrowser();
 var http = lib_1.Platform.http();
 var apiKey = '4473112-a196654cdbdfffe7ac8adcf39';
@@ -544,7 +544,7 @@ exports.getPictures = getPictures;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(0);
+var tslib_1 = __webpack_require__(1);
 var OCA = __webpack_require__(8);
 var PB = __webpack_require__(9);
 function getPictures(word, count, attempt) {
@@ -574,10 +574,17 @@ exports.getPictures = getPictures;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(0);
+var tslib_1 = __webpack_require__(1);
 var canvas_access_1 = __webpack_require__(2);
 var get_pictures_1 = __webpack_require__(10);
 var utils_1 = __webpack_require__(3);
+var lib_1 = __webpack_require__(0);
+lib_1.setupBrowser();
+var http = lib_1.Platform.http();
+var apiUrl = 'https://told-academy.azurewebsites.net/api/';
+function recordAnswer(word, imageUrl) {
+    http.request(apiUrl + "word-to-picture-record-answer?word=" + word + "&imageUrl=" + encodeURIComponent(imageUrl)).then();
+}
 var WordToPictureGame = (function () {
     function WordToPictureGame(canvasAccess, words) {
         var _this = this;
@@ -846,7 +853,10 @@ var WordToPictureGame = (function () {
             return;
         }
         var isRight = this.words.answer(this.word, choice.word);
-        // TODO: Record Image Selection
+        // Record Image Selection
+        if (isRight) {
+            recordAnswer(this.word, choice.imageUrl);
+        }
         if (!isRight) {
             choice.isDisabled = true;
             // TODO: Only redraw mistake

@@ -3,6 +3,15 @@ import { UserInput, UserInputType, CanvasAccess } from '../../canvas-access';
 import { getPictures } from './get-pictures';
 import { randomize } from '../../utils';
 
+import { Platform, setupBrowser } from '@told/platform/lib';
+
+setupBrowser();
+let http = Platform.http();
+
+const apiUrl = 'https://told-academy.azurewebsites.net/api/';
+function recordAnswer(word: string, imageUrl: string) {
+    http.request(`${apiUrl}word-to-picture-record-answer?word=${word}&imageUrl=${encodeURIComponent(imageUrl)}`).then();
+}
 
 interface Button {
     u: number;
@@ -258,9 +267,10 @@ export class WordToPictureGame implements CanvasGame {
 
         let isRight = this.words.answer(this.word, choice.word);
 
-        // TODO: Record Image Selection
-
-
+        // Record Image Selection
+        if (isRight) {
+            recordAnswer(this.word, choice.imageUrl);
+        }
 
         if (!isRight) {
             choice.isDisabled = true;

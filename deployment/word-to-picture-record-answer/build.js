@@ -78561,7 +78561,7 @@ var blob_utils_1 = __webpack_require__(258);
 var settings_1 = __webpack_require__(118);
 function main(context, request) {
     return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var word, imageUrl, containerName, blobBaseName, service, appendBlobName, result, imageBlobName, props, response;
+        var word, imageUrl, containerName, blobBaseName, service, appendBlobName, result, imageBlobName, response;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -78572,15 +78572,14 @@ function main(context, request) {
                     blobBaseName = request.query.word;
                     service = blob_utils_1.createBlobService();
                     appendBlobName = blobBaseName + '/usage.append.txt';
-                    return [4 /*yield*/, service.appendText(containerName, appendBlobName, imageUrl)];
+                    return [4 /*yield*/, service.appendText(containerName, appendBlobName, imageUrl + '\r\n')];
                 case 1:
                     result = _a.sent();
                     context.log('Saved Usage', 'appendBlobName', appendBlobName, 'committedBlockCount', result.committedBlockCount);
-                    imageBlobName = blobBaseName + '/image/' + encodeURIComponent(imageUrl);
-                    return [4 /*yield*/, service.getBlobProperties(containerName, imageBlobName)];
+                    imageBlobName = blobBaseName + '/images/' + encodeURIComponent(imageUrl);
+                    return [4 /*yield*/, service.doesBlobExist(containerName, imageBlobName)];
                 case 2:
-                    props = _a.sent();
-                    if (!!props.exists) return [3 /*break*/, 5];
+                    if (!!(_a.sent())) return [3 /*break*/, 5];
                     context.log('Copy Image START', 'imageBlobName', imageBlobName);
                     return [4 /*yield*/, node_utils_1.httpRequest_stream(imageUrl, 'GET')];
                 case 3:
@@ -78622,9 +78621,7 @@ var promisify_1 = __webpack_require__(260);
 function createBlobService() {
     var service = azure_storage_1.createBlobService();
     var promisified = promisifyBlobService(service);
-    var extended = tslib_1.__assign({}, promisified, { appendText: function (container, blob, content) {
-            return appendText(promisified, container, blob, content);
-        } });
+    var extended = tslib_1.__assign({}, promisified, { appendText: function (container, blob, content) { return appendText(promisified, container, blob, content); }, doesBlobExist: function (container, blob) { return doesBlobExist(promisified, container, blob); } });
     return extended;
 }
 exports.createBlobService = createBlobService;
@@ -78642,10 +78639,33 @@ function promisifyBlobService(service) {
     };
 }
 var example = promisifyBlobService(null);
+function doesBlobExist(service, container, blob) {
+    return tslib_1.__awaiter(this, void 0, void 0, function () {
+        var exists, blobProps, err2_1;
+        return tslib_1.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    exists = false;
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, service.getBlobProperties(container, blob)];
+                case 2:
+                    blobProps = _a.sent();
+                    exists = blobProps.exists;
+                    return [3 /*break*/, 4];
+                case 3:
+                    err2_1 = _a.sent();
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/, exists];
+            }
+        });
+    });
+}
 function appendText(service, container, blob, content, shouldIncrementIfFull) {
     if (shouldIncrementIfFull === void 0) { shouldIncrementIfFull = true; }
     return tslib_1.__awaiter(this, void 0, void 0, function () {
-        var err_1, blobProps;
+        var err_1;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -78654,10 +78674,9 @@ function appendText(service, container, blob, content, shouldIncrementIfFull) {
                 case 1: return [2 /*return*/, _a.sent()];
                 case 2:
                     err_1 = _a.sent();
-                    return [4 /*yield*/, service.getBlobProperties(container, blob)];
+                    return [4 /*yield*/, doesBlobExist(service, container, blob)];
                 case 3:
-                    blobProps = _a.sent();
-                    if (!!blobProps.exists) return [3 /*break*/, 5];
+                    if (!!(_a.sent())) return [3 /*break*/, 5];
                     return [4 /*yield*/, service.createAppendBlobFromText(container, blob, content)];
                 case 4: return [2 /*return*/, _a.sent()];
                 case 5: return [3 /*break*/, 6];

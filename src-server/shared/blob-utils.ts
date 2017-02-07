@@ -9,9 +9,8 @@ export function createBlobService() {
 
     let extended = {
         ...promisified,
-        appendText: (container: string, blob: string, content: string) => {
-            return appendText(promisified, container, blob, content);
-        },
+        appendText: (container: string, blob: string, content: string) => appendText(promisified, container, blob, content),
+        doesBlobExist: (container: string, blob: string) => doesBlobExist(promisified, container, blob)
     };
 
     return extended;
@@ -32,13 +31,24 @@ function promisifyBlobService(service: BlobService) {
 let example = promisifyBlobService(null);
 type BlobServicePromisified = typeof example;
 
+async function doesBlobExist(service: BlobServicePromisified, container: string, blob: string) {
+    let exists = false;
+    try {
+        let blobProps = await service.getBlobProperties(container, blob);
+        exists = blobProps.exists;
+    }
+    catch (err2) {
+    }
+    return exists;
+}
+
 async function appendText(service: BlobServicePromisified, container: string, blob: string, content: string, shouldIncrementIfFull = true) {
     try {
         return await service.appendBlockFromText(container, blob, content);
     } catch (err) {
         // Check for blob
-        let blobProps = await service.getBlobProperties(container, blob);
-        if (!blobProps.exists) {
+
+        if (!await doesBlobExist(service, container, blob)) {
             return await service.createAppendBlobFromText(container, blob, content);
         }
 

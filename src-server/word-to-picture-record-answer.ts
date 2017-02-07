@@ -30,16 +30,15 @@ export async function main(context: T.Context<ResponseData>, request: Request) {
 
     // Save usage into append blob
     let appendBlobName = blobBaseName + '/usage.append.txt';
-    let result = await service.appendText(containerName, appendBlobName, imageUrl);
+    let result = await service.appendText(containerName, appendBlobName, imageUrl + '\r\n');
     context.log('Saved Usage',
         'appendBlobName', appendBlobName,
         'committedBlockCount', result.committedBlockCount,
     );
 
     // Check if image copy exits
-    let imageBlobName = blobBaseName + '/image/' + encodeURIComponent(imageUrl);
-    let props = await service.getBlobProperties(containerName, imageBlobName);
-    if (!props.exists) {
+    let imageBlobName = blobBaseName + '/images/' + encodeURIComponent(imageUrl);
+    if (!await service.doesBlobExist(containerName, imageBlobName)) {
         context.log('Copy Image START',
             'imageBlobName', imageBlobName,
         );
