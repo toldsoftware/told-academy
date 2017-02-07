@@ -63,11 +63,51 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 13);
+/******/ 	return __webpack_require__(__webpack_require__.s = 260);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 119:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var tslib_1 = __webpack_require__(24);
+var resource_1 = __webpack_require__(54);
+function main(context, request) {
+    return tslib_1.__awaiter(this, void 0, void 0, function () {
+        return tslib_1.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    // request.query.name = 'index.html';
+                    request.query.name = 'word-to-picture.html';
+                    return [4 /*yield*/, resource_1.main(context, request, 0)];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+exports.main = main;
+
+
+/***/ }),
+
+/***/ 14:
+/***/ (function(module, exports) {
+
+module.exports = require("fs");
+
+/***/ }),
+
+/***/ 15:
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+
+/***/ 24:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -177,7 +217,17 @@ function __generator(thisArg, body) {
 };
 
 /***/ }),
-/* 1 */
+
+/***/ 260:
+/***/ (function(module, exports, __webpack_require__) {
+
+// Intentionally global
+___export = __webpack_require__(53).setDirName(__dirname).serve(__webpack_require__(119).main);
+module.exports = ___export;
+
+/***/ }),
+
+/***/ 41:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -186,22 +236,66 @@ exports.dir = { rootDir: '' };
 
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports) {
 
-module.exports = require("path");
-
-/***/ }),
-/* 3 */
+/***/ 53:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var tslib_1 = __webpack_require__(0);
-var fs = __webpack_require__(5);
-var Path = __webpack_require__(2);
-var resolve_url_1 = __webpack_require__(4);
-var root_dir_1 = __webpack_require__(1);
+var tslib_1 = __webpack_require__(24);
+var path = __webpack_require__(15);
+var root_dir_1 = __webpack_require__(41);
+function setDirName(dirName) {
+    root_dir_1.dir.rootDir = path.resolve(dirName, '..');
+    return this;
+}
+exports.setDirName = setDirName;
+function serve(main) {
+    return function (context, request) {
+        var req = tslib_1.__assign({}, request);
+        req.pathName = req.pathName || context.bindingData.pathName || '';
+        req.pathParts = req.pathName.split('/').filter(function (x) { return x.length > 0; });
+        if (req.query.ping != null) {
+            context.done(null, {
+                status: 200,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'PONG',
+            });
+            return;
+        }
+        // Auto-Parse Json
+        if (typeof req.body === 'string') {
+            var orig = req.body;
+            try {
+                req.body = JSON.parse(req.body);
+            }
+            catch (err) {
+                req.body = orig;
+            }
+        }
+        main(context, req)
+            .then(function () { })
+            .catch(function (err) {
+            context.log('Uncaught Error:', err);
+            context.done(err, null);
+        });
+    };
+}
+exports.serve = serve;
+
+
+/***/ }),
+
+/***/ 54:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var tslib_1 = __webpack_require__(24);
+var fs = __webpack_require__(14);
+var Path = __webpack_require__(15);
+var resolve_url_1 = __webpack_require__(75);
+var root_dir_1 = __webpack_require__(41);
 function main(context, request, pathDepthFromApiRoot) {
     if (pathDepthFromApiRoot === void 0) { pathDepthFromApiRoot = 1; }
     return tslib_1.__awaiter(this, void 0, void 0, function () {
@@ -280,7 +374,8 @@ exports.main = main;
 
 
 /***/ }),
-/* 4 */
+
+/***/ 75:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -332,97 +427,7 @@ function getPathDepthPrefix(pathDepthFromApiRoot) {
 exports.getPathDepthPrefix = getPathDepthPrefix;
 
 
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-module.exports = require("fs");
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(0);
-var resource_1 = __webpack_require__(3);
-function main(context, request) {
-    return tslib_1.__awaiter(this, void 0, void 0, function () {
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    // request.query.name = 'index.html';
-                    request.query.name = 'word-to-picture.html';
-                    return [4 /*yield*/, resource_1.main(context, request, 0)];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-exports.main = main;
-
-
-/***/ }),
-/* 7 */,
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(0);
-var path = __webpack_require__(2);
-var root_dir_1 = __webpack_require__(1);
-function setDirName(dirName) {
-    root_dir_1.dir.rootDir = path.resolve(dirName, '..');
-    return this;
-}
-exports.setDirName = setDirName;
-function serve(main) {
-    return function (context, request) {
-        var req = tslib_1.__assign({}, request);
-        req.pathName = req.pathName || context.bindingData.pathName || '';
-        req.pathParts = req.pathName.split('/').filter(function (x) { return x.length > 0; });
-        if (req.query.ping != null) {
-            context.done(null, {
-                status: 200,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'PONG',
-            });
-            return;
-        }
-        // Auto-Parse Json
-        if (typeof req.body === 'string') {
-            var orig = req.body;
-            try {
-                req.body = JSON.parse(req.body);
-            }
-            catch (err) {
-                req.body = orig;
-            }
-        }
-        main(context, req)
-            .then(function () { })
-            .catch(function (err) {
-            context.log('Uncaught Error:', err);
-            context.done(err, null);
-        });
-    };
-}
-exports.serve = serve;
-
-
-/***/ }),
-/* 9 */,
-/* 10 */,
-/* 11 */,
-/* 12 */,
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// Intentionally global
-___export = __webpack_require__(8).setDirName(__dirname).serve(__webpack_require__(6).main);
-module.exports = ___export;
-
 /***/ })
-/******/ ]);
+
+/******/ });
 //# sourceMappingURL=build.js.map

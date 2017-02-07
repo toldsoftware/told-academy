@@ -1,0 +1,8 @@
+export function createSomethingComplex() {
+    return {
+        thisIsComplex: (a: boolean, b: number, c: string) => ({ 'yes': { 'it': { 'is': true } } }),
+        andIDontWantToWriteAnInterface: true
+    };
+}
+
+type ComplexThing = typeof ( createSomethingComplex());

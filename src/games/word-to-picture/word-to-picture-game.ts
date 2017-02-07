@@ -1,7 +1,7 @@
 import { CanvasGame } from '../../canvas-game';
 import { UserInput, UserInputType, CanvasAccess } from '../../canvas-access';
 import { getPictures } from './get-pictures';
-import { randomize } from '../../randomize';
+import { randomize } from '../../utils';
 
 
 interface Button {
@@ -30,7 +30,7 @@ export class WordToPictureGame implements CanvasGame {
     private speedMode = false;
     private countdownLimit = 15;
     private countdownTimer = 0;
-    private countdownIntervalId = 0;
+    private countdownIntervalId: any;
 
     constructor(private canvasAccess: CanvasAccess, private words: WordProvider) {
         this.buttons = [];

@@ -1,10 +1,13 @@
 import { Platform, setupBrowser } from '@told/platform/lib';
 
-import { randomize } from '../src/randomize';
+import { randomize, distinct } from '../src/utils';
 import { hostCanvasGame } from '../src/canvas-game';
 import { ProblemHistory } from '../src/subjects/problems';
 import { loadUnixode } from '../src/subjects/unixode-loader';
 import { WordToPictureGame, WordProvider } from '../src/games/word-to-picture/word-to-picture-game';
+
+import { wordList } from '../src/subjects/word-list-knowledge-tree';
+
 
 setupBrowser();
 let http = Platform.http();
@@ -22,14 +25,18 @@ function setup() {
         // Get Word List
 
         let wordProvider = new SimpleWordProvider();
-        wordProvider.words = list.words.map(x => x.english.toLowerCase());
+        wordProvider.words = wordList.toLowerCase().split('\n').map(x => x.trim()).filter(x => x.length > 0);
 
-        // TODO: Order Word List (Use Knowldge Tree?)
-        wordProvider.words = randomize(wordProvider.words);
+        wordProvider.words = distinct(wordProvider.words);
 
-        // TEMP Order by length
-        wordProvider.words.sort((a, b) => a.length - b.length);
-        wordProvider.words = wordProvider.words.filter(x => x.length >= 3);
+        // wordProvider.words = list.words.map(x => x.english.toLowerCase());
+
+        // // TODO: Order Word List (Use Knowldge Tree?)
+        // wordProvider.words = randomize(wordProvider.words);
+
+        // // TEMP Order by length
+        // wordProvider.words.sort((a, b) => a.length - b.length);
+        // wordProvider.words = wordProvider.words.filter(x => x.length >= 3);
 
 
         hostCanvasGame(host, (access) => new WordToPictureGame(access, wordProvider));

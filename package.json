@@ -43,6 +43,8 @@
   "dependencies": {
     "@told/azure-functions-server": "^1.8.0",
     "@told/knowledge-model": "^1.1.0",
-    "@told/platform": "^1.1.0"
+    "@told/platform": "^1.1.0",
+    "@types/node": "^7.0.5",
+    "azure-storage": "^2.0.0"
   }
 }
