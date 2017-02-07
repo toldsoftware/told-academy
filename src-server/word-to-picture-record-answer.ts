@@ -37,7 +37,7 @@ export async function main(context: T.Context<ResponseData>, request: Request) {
     );
 
     // Check if image copy exits
-    let imageBlobName = blobBaseName + '/image/' + imageUrl;
+    let imageBlobName = blobBaseName + '/image/' + encodeURIComponent(imageUrl);
     let props = await service.getBlobProperties(containerName, imageBlobName);
     if (!props.exists) {
         context.log('Copy Image START',

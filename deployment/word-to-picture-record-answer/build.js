@@ -78576,7 +78576,7 @@ function main(context, request) {
                 case 1:
                     result = _a.sent();
                     context.log('Saved Usage', 'appendBlobName', appendBlobName, 'committedBlockCount', result.committedBlockCount);
-                    imageBlobName = blobBaseName + '/image/' + imageUrl;
+                    imageBlobName = blobBaseName + '/image/' + encodeURIComponent(imageUrl);
                     return [4 /*yield*/, service.getBlobProperties(containerName, imageBlobName)];
                 case 2:
                     props = _a.sent();
@@ -78757,7 +78757,12 @@ function promisify(f, thisContext) {
         var args = Array.prototype.slice.call(arguments);
         return new Promise(function (resolve, reject) {
             args.push(function (err, result) { return err !== null ? reject(err) : resolve(result); });
-            f.apply(thisContext, args);
+            try {
+                f.apply(thisContext, args);
+            }
+            catch (err) {
+                reject(err);
+            }
         });
     };
 }

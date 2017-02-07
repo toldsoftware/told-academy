@@ -11,7 +11,11 @@ export function promisify(f: any, thisContext: any = null) {
         let args = Array.prototype.slice.call(arguments);
         return new Promise((resolve, reject) => {
             args.push((err: any, result: any) => err !== null ? reject(err) : resolve(result));
-            f.apply(thisContext, args);
+            try {
+                f.apply(thisContext, args);
+            } catch (err) {
+                reject(err);
+            }
         });
     };
 }
